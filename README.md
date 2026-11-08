@@ -1,12 +1,13 @@
 # Innygr's Server Plugin
 
-A collection of server-side utilities for **Minecraft Bedrock Dedicated Server**, beginning with the **InnygrEnchantments** Behavior Pack.
+A collection of gameplay additions and server-side utilities for **Minecraft Bedrock Dedicated Server**, beginning with the **InnygrEnchantments** Behavior Pack.
 
 > **Status:** Early planning and scaffolding. Nothing in this repository should be considered a stable release yet.
 
 ## Project goals
 
 - Add configurable, balanced utility enchantments to vanilla equipment.
+- Introduce custom knives as a lighter, faster alternative to vanilla swords.
 - Improve the usefulness of supported off-hand interactions.
 - Expand later with additional combat and rare/legendary enchantments.
 - Keep one maintained Behavior Pack source that can be enabled in multiple worlds.
@@ -20,10 +21,10 @@ This project is not a Java Edition server plugin. Bedrock Behavior Packs are ena
 
 1. Utility enchantments
 2. Off-hand utility
-3. Combat enchantments
+3. Custom knives and combat additions
 4. Legendary enchantments
 
-See [the enchantment plan](docs/ENCHANTMENTS.md), [the off-hand plan](docs/OFFHAND.md), and the [roadmap](ROADMAP.md).
+See [the enchantment plan](docs/ENCHANTMENTS.md), [the knife design](docs/KNIVES.md), [the off-hand plan](docs/OFFHAND.md), and the [roadmap](ROADMAP.md).
 
 ## Repository layout
 
@@ -31,6 +32,7 @@ See [the enchantment plan](docs/ENCHANTMENTS.md), [the off-hand plan](docs/OFFHA
 .
 ├── docs/
 │   ├── ENCHANTMENTS.md
+│   ├── KNIVES.md
 │   └── OFFHAND.md
 ├── CHANGELOG.md
 └── ROADMAP.md
@@ -40,7 +42,7 @@ The actual Behavior Pack manifest and scripts will be added after the target Bed
 
 ## Development principles
 
-- Prefer vanilla items and equipment; no custom armor or weapons in the initial scope.
+- Use vanilla equipment as the base for enchantments; custom knives are an explicit addition to the initial scope.
 - Keep features modular and individually testable.
 - Avoid undocumented or experimental APIs unless clearly isolated and tested.
 - Back up worlds before deployment.
