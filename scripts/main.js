@@ -4,7 +4,6 @@ import {
   CustomCommandStatus,
   EntityComponentTypes,
   EquipmentSlot,
-  Player,
   system,
   world,
 } from "@minecraft/server";
