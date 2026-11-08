@@ -47,7 +47,7 @@ The next candidates come from the agreed design pool drawing inspiration from **
 
 - **Defence and survival:** Resilience, Potion Barrier, Deflect, Health Synergy, Stone.
 - **Movement and exploration:** Surefooted, Explorer.
-- **Utility and combat effects:** Chilling, Snowball, Stealth, Cool Down, Shadowcloak, Sunder.
+- **Utility and defensive effects:** Chilling, Snowball, Stealth, Cool Down, Shadowcloak.
 - **Implemented from the approved pool:** Defender, Water Affinity, Vitality, Safeguard, Springload.
 
 ## Technical notes
