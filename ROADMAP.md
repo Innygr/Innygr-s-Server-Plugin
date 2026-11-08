@@ -8,31 +8,28 @@
 - [x] Add the Behavior Pack manifest and script entry point.
 - [x] Keep the pack server-side only: no Resource Pack or client-side scripts.
 
-## Phase 1 — Utility foundation
-- [x] Implement a small, testable enchantment framework.
+## Phase 1 — Utility enchantments
+- [x] Implement the enchantment marker and effect framework.
 - [x] Prototype Vitality (chestplate regeneration).
+- [x] Prototype Safeguard (chestplate Resistance).
 - [x] Prototype Aquatic (helmet water breathing and swimming utility).
-- [ ] Prototype Anchor (knockback reduction).
-- [x] Implement Prospector's server-side ore-break bonus prototype.
-- [ ] Prototype Lumberjack (tree-collection assistance).
-- [ ] Prototype Angler's Luck (fishing utility).
-- [ ] Prototype Wayfinder (navigation assistance).
-- [ ] Test command registration, lore persistence, ore-drop behavior, and effect behavior on a disposable world.
+- [x] Prototype Springload (boots Jump Boost).
+- [x] Implement Prospector's server-side ore-break bonus.
+- [ ] Implement the remaining approved candidate enchantments where stable API support exists.
+- [ ] Test multi-enchantment lore persistence, command registration, effects, and ore drops in a disposable world.
 
 ## Phase 2 — Off-hand utility
-- [ ] Audit supported Bedrock off-hand items and equipment-slot behavior.
-- [ ] Prototype a compass/navigation utility only if the target server permits the item in the off-hand.
-- [ ] Prototype server-side torch/visibility support only if it can work without client assets.
-- [ ] Prototype compass/navigation support.
+- [ ] Audit supported Bedrock off-hand items and equipment-slot behavior on 1.26.63.1.
+- [ ] Prototype compass/navigation utility only if the target server permits a compass in the off-hand.
+- [ ] Investigate server-side visibility support without client assets.
 - [ ] Preserve vanilla shield, totem, and map behavior.
 
 ## Phase 3 — Additional gameplay
-- [ ] Implement the remaining approved candidate enchantments only where supported by the server API.
-- [ ] Add selected rare/legendary enchantments.
+- [ ] Add selected rare/legendary enchantments after the utility set is stable.
 - [ ] Add configuration and compatibility documentation.
 
 ## Phase 4 — Release
 - [ ] Test on a disposable world.
 - [ ] Test multiplayer behavior and performance.
-- [ ] Package a release-ready .mcpack.
-- [ ] Deploy to The Cat Server after a verified backup.
+- [ ] Package a release-ready `.mcpack`.
+- [ ] Deploy to The Cat Server only after a verified backup.
