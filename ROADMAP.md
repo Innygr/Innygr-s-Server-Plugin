@@ -13,15 +13,15 @@
 - [x] Prototype Vitality (chestplate regeneration).
 - [x] Prototype Aquatic (helmet water breathing and swimming utility).
 - [ ] Prototype Anchor (knockback reduction).
-- [ ] Prototype Prospector (mining bonus).
+- [x] Implement Prospector's server-side ore-break bonus prototype.
 - [ ] Prototype Lumberjack (tree-collection assistance).
 - [ ] Prototype Angler's Luck (fishing utility).
 - [ ] Prototype Wayfinder (navigation assistance).
-- [ ] Test command registration, lore persistence, and effect behavior on a disposable world.
+- [ ] Test command registration, lore persistence, ore-drop behavior, and effect behavior on a disposable world.
 
 ## Phase 2 — Off-hand utility
 - [ ] Audit supported Bedrock off-hand items and equipment-slot behavior.
-- [ ] Prototype torch/visibility support where technically possible.
+- [ ] Prototype server-side torch/visibility support only if it can work without client assets.
 - [ ] Prototype compass/navigation support.
 - [ ] Preserve vanilla shield, totem, and map behavior.
 
