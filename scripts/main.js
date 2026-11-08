@@ -49,6 +49,20 @@ const ENCHANTMENT_DEFINITIONS = {
     slotName: "boots",
     maxLevel: 3,
   },
+  defender: {
+    displayName: "Defender",
+    slot: EquipmentSlot.Offhand,
+    accepts: (typeId) => typeId === "minecraft:shield",
+    slotName: "a shield in your off hand",
+    maxLevel: 3,
+  },
+  water_affinity: {
+    displayName: "Water Affinity",
+    slot: EquipmentSlot.Offhand,
+    accepts: (typeId) => typeId === "minecraft:nautilus_shell",
+    slotName: "a nautilus shell in your off hand",
+    maxLevel: 3,
+  },
 };
 
 const PROSPECTOR_CHANCES = [0, 0.05, 0.10, 0.15];
@@ -188,6 +202,7 @@ function updatePlayerEnchantments(player) {
     const chest = equippable.getEquipment(EquipmentSlot.Chest);
     const helmet = equippable.getEquipment(EquipmentSlot.Head);
     const boots = equippable.getEquipment(EquipmentSlot.Feet);
+    const offhand = equippable.getEquipment(EquipmentSlot.Offhand);
 
     const vitalityLevel = readEnchantmentLevel(chest, "vitality");
     if (vitalityLevel > 0) {
@@ -208,6 +223,17 @@ function updatePlayerEnchantments(player) {
     const springloadLevel = readEnchantmentLevel(boots, "springload");
     if (springloadLevel > 0) {
       applyEffectIfNeeded(player, "jump_boost", springloadLevel - 1);
+    }
+
+    const defenderLevel = readEnchantmentLevel(offhand, "defender");
+    if (defenderLevel > 0) {
+      applyEffectIfNeeded(player, "resistance", defenderLevel - 1);
+    }
+
+    const waterAffinityLevel = readEnchantmentLevel(offhand, "water_affinity");
+    if (waterAffinityLevel > 0) {
+      applyEffectIfNeeded(player, "water_breathing", 0);
+      applyEffectIfNeeded(player, "dolphins_grace", waterAffinityLevel - 1);
     }
   } catch {
     // Players can change dimensions, disconnect, or have invalid entities
@@ -256,6 +282,8 @@ system.beforeEvents.startup.subscribe((event) => {
     "prospector",
     "safeguard",
     "springload",
+    "defender",
+    "water_affinity",
   ]);
 
   registry.registerCommand(
