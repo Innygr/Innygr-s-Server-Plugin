@@ -26,11 +26,13 @@ This project is not a Java Edition server plugin. Bedrock Behavior Packs are ena
 - **Safeguard I–III:** chestplate-based Resistance.
 - **Aquatic I–III:** helmet-based Water Breathing and level-scaled Dolphin's Grace.
 - **Springload I–III:** boots-based Jump Boost.
+- **Defender I–III:** off-hand shield-based Resistance while preserving normal shield blocking.
+- **Water Affinity I–III:** off-hand nautilus shell-based Water Breathing and swimming utility.
 - **Prospector I–III:** pickaxe-based chance for one bonus ore drop, with Silk Touch respected.
 
 Multiple custom enchantments can coexist on one compatible vanilla item.
 
-Operators apply a prototype using `/innygr:enchant <vitality|safeguard|aquatic|springload|prospector> <1-3>` while wearing or holding the matching item.
+Operators apply a prototype using `/innygr:enchant <vitality|safeguard|aquatic|springload|defender|water_affinity|prospector> <1-3>` while wearing or holding the matching item.
 
 See [the enchantment plan](docs/ENCHANTMENTS.md), [the off-hand plan](docs/OFFHAND.md), and the [roadmap](ROADMAP.md).
 
