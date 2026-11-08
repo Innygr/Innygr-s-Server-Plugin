@@ -275,6 +275,93 @@ function handleProspectorBlockBreak(event) {
 system.beforeEvents.startup.subscribe((event) => {
   const registry = event.customCommandRegistry;
 
+  registry.registerEnum("innygr:companion_action", ["summon", "dismiss"]);
+
+  registry.registerCommand(
+    {
+      name: "innygr:companion",
+      description: "Summon or dismiss your personal guardian companion.",
+      permissionLevel: CommandPermissionLevel.Any,
+      cheatsRequired: false,
+      mandatoryParameters: [
+        {
+          type: CustomCommandParamType.Enum,
+          name: "innygr:companion_action",
+        },
+      ],
+    },
+    (origin, args) => {
+      const player = origin.sourceEntity;
+      if (!player || player.typeId !== "minecraft:player") {
+        return commandResult(
+          CustomCommandStatus.Failure,
+          "Run this command in-game as a player."
+        );
+      }
+
+      const ownedWolves = player.dimension
+        .getEntities({ type: "minecraft:wolf" })
+        .filter((entity) => {
+          try {
+            const tameable = entity.getComponent(EntityComponentTypes.Tameable);
+            return tameable?.tamedToPlayerId === player.id;
+          } catch {
+            return false;
+          }
+        });
+
+      if (args[0] === "dismiss") {
+        for (const wolf of ownedWolves) {
+          try {
+            wolf.remove();
+          } catch {
+            // Continue dismissing any remaining owned companions.
+          }
+        }
+        return commandResult(
+          CustomCommandStatus.Success,
+          ownedWolves.length
+            ? "Your guardian companion has been dismissed."
+            : "You do not have a guardian companion in this dimension."
+        );
+      }
+
+      if (ownedWolves.length > 0) {
+        return commandResult(
+          CustomCommandStatus.Failure,
+          "You already have a guardian companion in this dimension. Dismiss it first."
+        );
+      }
+
+      try {
+        const location = player.location;
+        const wolf = player.dimension.spawnEntity("minecraft:wolf", {
+          x: location.x + 1.5,
+          y: location.y,
+          z: location.z,
+        });
+        const tameable = wolf.getComponent(EntityComponentTypes.Tameable);
+        if (!tameable?.tame(player)) {
+          wolf.remove();
+          return commandResult(
+            CustomCommandStatus.Failure,
+            "The guardian companion could not be bound to you."
+          );
+        }
+        wolf.nameTag = `${player.name}'s Guardian`;
+        return commandResult(
+          CustomCommandStatus.Success,
+          "Your guardian companion has been summoned. It recognizes you as its owner and can defend you when threatened."
+        );
+      } catch {
+        return commandResult(
+          CustomCommandStatus.Failure,
+          "Could not summon a guardian companion here."
+        );
+      }
+    }
+  );
+
   registry.registerEnum("innygr:enchantment", [
     "vitality",
     "aquatic",
