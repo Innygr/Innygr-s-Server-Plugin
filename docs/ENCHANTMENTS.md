@@ -8,11 +8,11 @@ These are **server-managed enchantment effects** applied to vanilla items. They 
 |---|---|---|---|
 | Vitality I–III | Chestplate | Passive regeneration; higher levels increase strength | Implemented |
 | Safeguard I–III | Chestplate | Resistance; higher levels increase strength | Implemented; needs in-game balance testing |
-| Aquatic I–III | Helmet | Water Breathing and level-scaled Dolphin's Grace | Implemented |
+| Aquatic I–III | Helmet | Water Breathing and level-scaled Conduit Power | Implemented |
 | Springload I–III | Boots | Jump Boost; higher levels increase strength | Implemented; needs in-game balance testing |
 | Prospector I–III | Pickaxe | Chance for one bonus ore drop | Implemented; needs in-game balance testing |
 | Defender I–III | Off-hand shield | Resistance while the vanilla shield is held | Implemented; needs in-game balance testing |
-| Water Affinity I–III | Off-hand nautilus shell | Water Breathing and level-scaled Dolphin's Grace | Implemented; needs in-game balance testing |
+| Water Affinity I–III | Off-hand nautilus shell | Water Breathing and level-scaled Conduit Power | Implemented; needs in-game balance testing |
 
 Multiple Innygr enchantments can now coexist on one compatible vanilla item. Reapplying an enchantment replaces only that enchantment's level.
 
