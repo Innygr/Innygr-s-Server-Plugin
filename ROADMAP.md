@@ -15,14 +15,17 @@
 - [x] Prototype Aquatic (helmet water breathing and swimming utility).
 - [x] Prototype Springload (boots Jump Boost).
 - [x] Implement Prospector's server-side ore-break bonus.
+- [x] Implement Defender for vanilla off-hand shields.
+- [x] Implement Water Affinity for vanilla off-hand nautilus shells.
 - [ ] Implement the remaining approved candidate enchantments where stable API support exists.
 - [ ] Test multi-enchantment lore persistence, command registration, effects, and ore drops in a disposable world.
 
-## Phase 2 — Off-hand utility
-- [ ] Audit supported Bedrock off-hand items and equipment-slot behavior on 1.26.63.1.
-- [ ] Prototype compass/navigation utility only if the target server permits a compass in the off-hand.
-- [ ] Investigate server-side visibility support without client assets.
-- [ ] Preserve vanilla shield, totem, and map behavior.
+## Phase 2 — Off-hand validation
+- [x] Add off-hand equipment reads using the stable Script API.
+- [ ] Verify shield and nautilus-shell compatibility on Bedrock 1.26.63.1.
+- [ ] Confirm Defender does not interfere with vanilla shield blocking.
+- [ ] Confirm Water Affinity stops refreshing after removing the shell.
+- [ ] Preserve vanilla totem and map behavior.
 
 ## Phase 3 — Additional gameplay
 - [ ] Add selected rare/legendary enchantments after the utility set is stable.
