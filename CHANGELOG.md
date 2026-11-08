@@ -9,6 +9,8 @@
 - Safeguard I–III chestplate Resistance prototype.
 - Aquatic I–III helmet water-breathing and swimming-utility prototype.
 - Springload I–III boots Jump Boost prototype.
+- Defender I–III off-hand shield Resistance prototype.
+- Water Affinity I–III off-hand nautilus shell water utility prototype.
 - Multiple custom enchantments can coexist on a single compatible vanilla item.
 - Prospector I–III pickaxe prototype with a server-side chance for one bonus ore drop.
 - Silk Touch compatibility check for Prospector.
