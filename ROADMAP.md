@@ -3,19 +3,21 @@
 ## Phase 0 — Foundation
 - [x] Create the development branch.
 - [x] Establish project scope and development priorities.
-- [ ] Confirm the target Bedrock version and Script API module version.
+- [x] Confirm a stable Script API baseline: `@minecraft/server` 2.10.0.
 - [ ] Select and add a license.
-- [ ] Add the Behavior Pack manifest and script entry point.
+- [x] Add the Behavior Pack manifest and script entry point.
+- [x] Keep the pack server-side only: no Resource Pack or client-side scripts.
 
 ## Phase 1 — Utility foundation
-- [ ] Implement a small, testable enchantment framework.
-- [ ] Prototype Vitality (chestplate regeneration).
+- [x] Implement a small, testable enchantment framework.
+- [x] Prototype Vitality (chestplate regeneration).
+- [x] Prototype Aquatic (helmet water breathing and swimming utility).
 - [ ] Prototype Anchor (knockback reduction).
-- [ ] Prototype Aquatic (underwater utility).
 - [ ] Prototype Prospector (mining bonus).
 - [ ] Prototype Lumberjack (tree-collection assistance).
 - [ ] Prototype Angler's Luck (fishing utility).
 - [ ] Prototype Wayfinder (navigation assistance).
+- [ ] Test command registration, lore persistence, and effect behavior on a disposable world.
 
 ## Phase 2 — Off-hand utility
 - [ ] Audit supported Bedrock off-hand items and equipment-slot behavior.
@@ -23,11 +25,8 @@
 - [ ] Prototype compass/navigation support.
 - [ ] Preserve vanilla shield, totem, and map behavior.
 
-## Phase 3 — Combat additions
-- [ ] Prototype custom knives with faster attack cadence, shorter reach, and lower damage than swords.
-- [ ] Verify which attack-speed and reach behaviors can be implemented reliably on the target Bedrock version.
-- [ ] Balance knife variants and test multiplayer behavior.
-- [ ] Add selected combat enchantments.
+## Phase 3 — Additional gameplay
+- [ ] Add selected non-weapon gameplay effects only where supported by the server API.
 - [ ] Add selected rare/legendary enchantments.
 - [ ] Add configuration and compatibility documentation.
 
