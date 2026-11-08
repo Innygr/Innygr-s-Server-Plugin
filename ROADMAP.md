@@ -23,7 +23,10 @@
 - [ ] Prototype compass/navigation support.
 - [ ] Preserve vanilla shield, totem, and map behavior.
 
-## Phase 3 — Expansion
+## Phase 3 — Combat additions
+- [ ] Prototype custom knives with faster attack cadence, shorter reach, and lower damage than swords.
+- [ ] Verify which attack-speed and reach behaviors can be implemented reliably on the target Bedrock version.
+- [ ] Balance knife variants and test multiplayer behavior.
 - [ ] Add selected combat enchantments.
 - [ ] Add selected rare/legendary enchantments.
 - [ ] Add configuration and compatibility documentation.
