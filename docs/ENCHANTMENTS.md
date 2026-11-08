@@ -42,7 +42,7 @@ Vitality and Safeguard require a chestplate, Aquatic requires a helmet, Springlo
 The next candidates come from the agreed design pool drawing inspiration from **Minecraft Dungeons**, **Minecraft Dungeons II**, and **Diary of an 8-Bit Warrior**. This is a design catalogue, not a claim that every effect is already implemented or that every name is a direct source-game enchantment.
 
 - **Defence and survival:** Defender, Resilience, Potion Barrier, Deflect, Health Synergy, Stone.
-- **Movement and exploration:** Surefooted, Explorer, Water Affinity, Wayfinder.
+- **Movement and exploration:** Surefooted, Explorer, Water Affinity.
 - **Utility and combat effects:** Chilling, Snowball, Stealth, Cool Down, Shadowcloak, Sunder.
 - **Already represented in the prototype set:** Vitality, Safeguard, Springload.
 
