@@ -4,16 +4,20 @@ import {
   CustomCommandStatus,
   EntityComponentTypes,
   EquipmentSlot,
+  ItemStack,
   system,
   world,
 } from "@minecraft/server";
 
 const PACK_PREFIX = "§0[IE:";
+const ROMAN_LEVELS = ["", "I", "II", "III"];
+
 const ENCHANTMENT_DEFINITIONS = {
   vitality: {
     displayName: "Vitality",
     slot: EquipmentSlot.Chest,
     accepts: (typeId) => typeId.endsWith("_chestplate"),
+    slotName: "a chestplate",
     maxLevel: 3,
   },
   aquatic: {
@@ -21,8 +25,40 @@ const ENCHANTMENT_DEFINITIONS = {
     slot: EquipmentSlot.Head,
     accepts: (typeId) =>
       typeId.endsWith("_helmet") || typeId === "minecraft:turtle_helmet",
+    slotName: "a helmet",
     maxLevel: 3,
   },
+  prospector: {
+    displayName: "Prospector",
+    slot: EquipmentSlot.Mainhand,
+    accepts: (typeId) => typeId.endsWith("_pickaxe"),
+    slotName: "a pickaxe in your main hand",
+    maxLevel: 3,
+  },
+};
+
+const PROSPECTOR_CHANCES = [0, 0.05, 0.10, 0.15];
+const ORE_BONUS_DROPS = {
+  "minecraft:coal_ore": "minecraft:coal",
+  "minecraft:deepslate_coal_ore": "minecraft:coal",
+  "minecraft:iron_ore": "minecraft:raw_iron",
+  "minecraft:deepslate_iron_ore": "minecraft:raw_iron",
+  "minecraft:copper_ore": "minecraft:raw_copper",
+  "minecraft:deepslate_copper_ore": "minecraft:raw_copper",
+  "minecraft:gold_ore": "minecraft:raw_gold",
+  "minecraft:deepslate_gold_ore": "minecraft:raw_gold",
+  "minecraft:redstone_ore": "minecraft:redstone",
+  "minecraft:lit_redstone_ore": "minecraft:redstone",
+  "minecraft:deepslate_redstone_ore": "minecraft:redstone",
+  "minecraft:lit_deepslate_redstone_ore": "minecraft:redstone",
+  "minecraft:lapis_ore": "minecraft:lapis_lazuli",
+  "minecraft:deepslate_lapis_ore": "minecraft:lapis_lazuli",
+  "minecraft:diamond_ore": "minecraft:diamond",
+  "minecraft:deepslate_diamond_ore": "minecraft:diamond",
+  "minecraft:emerald_ore": "minecraft:emerald",
+  "minecraft:deepslate_emerald_ore": "minecraft:emerald",
+  "minecraft:nether_quartz_ore": "minecraft:quartz",
+  "minecraft:nether_gold_ore": "minecraft:gold_nugget",
 };
 
 function commandResult(status, message) {
@@ -79,24 +115,23 @@ function applyEnchantment(player, enchantment, level) {
 
   const item = equippable.getEquipment(definition.slot);
   if (!item || !definition.accepts(item.typeId)) {
-    const slotName = enchantment === "vitality" ? "a chestplate" : "a helmet";
     return commandResult(
       CustomCommandStatus.Failure,
-      `Equip ${slotName} first, then run this command again.`
+      `Hold ${definition.slotName}, then run this command again.`
     );
   }
 
   const lore = item.getLore().filter(
     (line) => !line.startsWith(PACK_PREFIX)
   );
-  lore.push(`§7${definition.displayName} ${["", "I", "II", "III"][level]}`);
+  lore.push(`§7${definition.displayName} ${ROMAN_LEVELS[level]}`);
   lore.push(getMarkerLine(enchantment, level));
   item.setLore(lore);
   equippable.setEquipment(definition.slot, item);
 
   return commandResult(
     CustomCommandStatus.Success,
-    `Applied ${definition.displayName} ${["", "I", "II", "III"][level]}.`
+    `Applied ${definition.displayName} ${ROMAN_LEVELS[level]}.`
   );
 }
 
@@ -145,15 +180,51 @@ function updatePlayerEnchantments(player) {
   }
 }
 
+function handleProspectorBlockBreak(event) {
+  try {
+    const tool = event.itemStackBeforeBreak;
+    if (!tool || !tool.typeId.endsWith("_pickaxe")) return;
+
+    const level = readEnchantmentLevel(tool, "prospector");
+    if (level < 1) return;
+
+    const blockId = event.brokenBlockPermutation.type.id;
+    const bonusDropId = ORE_BONUS_DROPS[blockId];
+    if (!bonusDropId) return;
+
+    // Silk Touch keeps its normal block drop and does not receive a bonus.
+    const enchantable = tool.getComponent("minecraft:enchantable");
+    if (enchantable?.hasEnchantment("silk_touch")) return;
+
+    if (Math.random() >= PROSPECTOR_CHANCES[level]) return;
+
+    const location = event.block.location;
+    event.dimension.spawnItem(
+      new ItemStack(bonusDropId, 1),
+      {
+        x: location.x + 0.5,
+        y: location.y + 0.5,
+        z: location.z + 0.5,
+      }
+    );
+  } catch {
+    // A failed bonus must never interrupt normal block breaking.
+  }
+}
+
 system.beforeEvents.startup.subscribe((event) => {
   const registry = event.customCommandRegistry;
 
-  registry.registerEnum("innygr:enchantment", ["vitality", "aquatic"]);
+  registry.registerEnum("innygr:enchantment", [
+    "vitality",
+    "aquatic",
+    "prospector",
+  ]);
 
   registry.registerCommand(
     {
       name: "innygr:enchant",
-      description: "Apply a prototype Innygr enchantment to equipped armor.",
+      description: "Apply a prototype Innygr enchantment to equipped gear.",
       permissionLevel: CommandPermissionLevel.Admin,
       cheatsRequired: false,
       mandatoryParameters: [
@@ -172,18 +243,16 @@ system.beforeEvents.startup.subscribe((event) => {
       if (!source || source.typeId !== "minecraft:player") {
         return commandResult(
           CustomCommandStatus.Failure,
-          "Run this command as a player while wearing the target armor."
+          "Run this command as a player while holding the target item."
         );
       }
 
-      const player = source;
-      const enchantment = args[0];
-      const level = args[1];
-
-      return applyEnchantment(player, enchantment, level);
+      return applyEnchantment(source, args[0], args[1]);
     }
   );
 });
+
+world.afterEvents.playerBreakBlock.subscribe(handleProspectorBlockBreak);
 
 // One check per second per online player. No client-side scripts or assets.
 system.runInterval(() => {
