@@ -21,12 +21,13 @@
 
 ## Phase 2 — Off-hand utility
 - [ ] Audit supported Bedrock off-hand items and equipment-slot behavior.
+- [ ] Prototype a compass/navigation utility only if the target server permits the item in the off-hand.
 - [ ] Prototype server-side torch/visibility support only if it can work without client assets.
 - [ ] Prototype compass/navigation support.
 - [ ] Preserve vanilla shield, totem, and map behavior.
 
 ## Phase 3 — Additional gameplay
-- [ ] Add selected non-weapon gameplay effects only where supported by the server API.
+- [ ] Implement the remaining approved candidate enchantments only where supported by the server API.
 - [ ] Add selected rare/legendary enchantments.
 - [ ] Add configuration and compatibility documentation.
 
