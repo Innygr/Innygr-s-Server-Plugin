@@ -2,7 +2,7 @@
 
 A collection of gameplay additions and server-side utilities for **Minecraft Bedrock Dedicated Server**, beginning with the **InnygrEnchantments** Behavior Pack.
 
-> **Status:** Early development. The first utility prototypes are implemented but not yet tested in-game.
+> **Status:** Early development. Vitality, Aquatic, and Prospector prototypes are implemented but not yet tested in-game.
 
 ## Non-negotiable architecture
 
@@ -20,14 +20,13 @@ A collection of gameplay additions and server-side utilities for **Minecraft Bed
 
 This project is not a Java Edition server plugin. Bedrock Behavior Packs are enabled per world. We maintain one shared pack build and register that same pack with each world that should use it; this provides a plugin-like workflow without claiming Bedrock has a globally loaded plugin system.
 
-## Current prototype
-
-The first script prototypes two utility enchantments:
+## Current prototypes
 
 - **Vitality I–III:** chestplate-based passive regeneration.
 - **Aquatic I–III:** helmet-based Water Breathing and level-scaled Dolphin's Grace.
+- **Prospector I–III:** pickaxe-based chance for one bonus ore drop, with Silk Touch respected.
 
-Operators apply a prototype to the armor they are wearing with `/innygr:enchant <vitality|aquatic> <1-3>`.
+Operators apply a prototype using `/innygr:enchant <vitality|aquatic|prospector> <1-3>` while wearing or holding the matching item.
 
 See [the enchantment plan](docs/ENCHANTMENTS.md), [the off-hand plan](docs/OFFHAND.md), and the [roadmap](ROADMAP.md).
 
