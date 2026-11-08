@@ -20,18 +20,24 @@
 - [ ] Implement the remaining approved candidate enchantments where stable API support exists.
 - [ ] Test multi-enchantment lore persistence, command registration, effects, and ore drops in a disposable world.
 
-## Phase 2 — Off-hand validation
+## Phase 2 — Guardian companions
+- [x] Add a player command to summon and dismiss an owner-bound vanilla wolf.
+- [x] Use the vanilla tameable component so the companion recognizes its summoner.
+- [ ] Test owner persistence, following, and defensive behavior in multiplayer.
+- [ ] Evaluate whether a future custom-entity approach is warranted for proactive player-targeting behavior.
+
+## Phase 3 — Off-hand validation
 - [x] Add off-hand equipment reads using the stable Script API.
 - [ ] Verify shield and nautilus-shell compatibility on Bedrock 1.26.63.1.
 - [ ] Confirm Defender does not interfere with vanilla shield blocking.
 - [ ] Confirm Water Affinity stops refreshing after removing the shell.
 - [ ] Preserve vanilla totem and map behavior.
 
-## Phase 3 — Additional gameplay
+## Phase 4 — Additional gameplay
 - [ ] Add selected rare/legendary enchantments after the utility set is stable.
 - [ ] Add configuration and compatibility documentation.
 
-## Phase 4 — Release
+## Phase 5 — Release
 - [ ] Test on a disposable world.
 - [ ] Test multiplayer behavior and performance.
 - [ ] Package a release-ready `.mcpack`.
