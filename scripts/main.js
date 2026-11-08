@@ -35,6 +35,20 @@ const ENCHANTMENT_DEFINITIONS = {
     slotName: "a pickaxe in your main hand",
     maxLevel: 3,
   },
+  safeguard: {
+    displayName: "Safeguard",
+    slot: EquipmentSlot.Chest,
+    accepts: (typeId) => typeId.endsWith("_chestplate"),
+    slotName: "a chestplate",
+    maxLevel: 3,
+  },
+  springload: {
+    displayName: "Springload",
+    slot: EquipmentSlot.Feet,
+    accepts: (typeId) => typeId.endsWith("_boots"),
+    slotName: "boots",
+    maxLevel: 3,
+  },
 };
 
 const PROSPECTOR_CHANCES = [0, 0.05, 0.10, 0.15];
@@ -121,9 +135,19 @@ function applyEnchantment(player, enchantment, level) {
     );
   }
 
-  const lore = item.getLore().filter(
-    (line) => !line.startsWith(PACK_PREFIX)
-  );
+  // Replace only this enchantment's marker so compatible vanilla items can
+  // carry multiple Innygr enchantments at once.
+  const markerPrefix = `${PACK_PREFIX}${enchantment}:`;
+  const lore = [];
+  for (const line of item.getLore()) {
+    if (line.startsWith(markerPrefix)) {
+      if (lore.length && lore[lore.length - 1].startsWith(`§7${definition.displayName} `)) {
+        lore.pop();
+      }
+      continue;
+    }
+    lore.push(line);
+  }
   lore.push(`§7${definition.displayName} ${ROMAN_LEVELS[level]}`);
   lore.push(getMarkerLine(enchantment, level));
   item.setLore(lore);
@@ -163,6 +187,7 @@ function updatePlayerEnchantments(player) {
 
     const chest = equippable.getEquipment(EquipmentSlot.Chest);
     const helmet = equippable.getEquipment(EquipmentSlot.Head);
+    const boots = equippable.getEquipment(EquipmentSlot.Feet);
 
     const vitalityLevel = readEnchantmentLevel(chest, "vitality");
     if (vitalityLevel > 0) {
@@ -173,6 +198,16 @@ function updatePlayerEnchantments(player) {
     if (aquaticLevel > 0) {
       applyEffectIfNeeded(player, "water_breathing", 0);
       applyEffectIfNeeded(player, "dolphins_grace", aquaticLevel - 1);
+    }
+
+    const safeguardLevel = readEnchantmentLevel(chest, "safeguard");
+    if (safeguardLevel > 0) {
+      applyEffectIfNeeded(player, "resistance", safeguardLevel - 1);
+    }
+
+    const springloadLevel = readEnchantmentLevel(boots, "springload");
+    if (springloadLevel > 0) {
+      applyEffectIfNeeded(player, "jump_boost", springloadLevel - 1);
     }
   } catch {
     // Players can change dimensions, disconnect, or have invalid entities
@@ -219,6 +254,8 @@ system.beforeEvents.startup.subscribe((event) => {
     "vitality",
     "aquatic",
     "prospector",
+    "safeguard",
+    "springload",
   ]);
 
   registry.registerCommand(
