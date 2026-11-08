@@ -212,7 +212,7 @@ function updatePlayerEnchantments(player) {
     const aquaticLevel = readEnchantmentLevel(helmet, "aquatic");
     if (aquaticLevel > 0) {
       applyEffectIfNeeded(player, "water_breathing", 0);
-      applyEffectIfNeeded(player, "dolphins_grace", aquaticLevel - 1);
+      applyEffectIfNeeded(player, "conduit_power", aquaticLevel - 1);
     }
 
     const safeguardLevel = readEnchantmentLevel(chest, "safeguard");
@@ -232,8 +232,7 @@ function updatePlayerEnchantments(player) {
 
     const waterAffinityLevel = readEnchantmentLevel(offhand, "water_affinity");
     if (waterAffinityLevel > 0) {
-      applyEffectIfNeeded(player, "water_breathing", 0);
-      applyEffectIfNeeded(player, "dolphins_grace", waterAffinityLevel - 1);
+      applyEffectIfNeeded(player, "conduit_power", waterAffinityLevel - 1);
     }
   } catch {
     // Players can change dimensions, disconnect, or have invalid entities
