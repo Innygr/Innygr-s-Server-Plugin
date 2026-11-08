@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- Added `/innygr:companion summon` and `/innygr:companion dismiss` for one owner-bound vanilla wolf per dimension.
+- Guardian companions use vanilla taming, following, and owner-defence behavior.
+
+## Unreleased
 
 ### Added
 - Initial server-only Behavior Pack manifest using stable `@minecraft/server` 2.10.0.
