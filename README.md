@@ -24,10 +24,10 @@ This project is not a Java Edition server plugin. Bedrock Behavior Packs are ena
 
 - **Vitality I–III:** chestplate-based passive regeneration.
 - **Safeguard I–III:** chestplate-based Resistance.
-- **Aquatic I–III:** helmet-based Water Breathing and level-scaled Dolphin's Grace.
+- **Aquatic I–III:** helmet-based Water Breathing and level-scaled Conduit Power.
 - **Springload I–III:** boots-based Jump Boost.
 - **Defender I–III:** off-hand shield-based Resistance while preserving normal shield blocking.
-- **Water Affinity I–III:** off-hand nautilus shell-based Water Breathing and swimming utility.
+- **Water Affinity I–III:** off-hand nautilus shell-based Conduit Power for underwater breathing, visibility, and mining utility.
 - **Prospector I–III:** pickaxe-based chance for one bonus ore drop, with Silk Touch respected.
 
 Multiple custom enchantments can coexist on one compatible vanilla item.
