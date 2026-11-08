@@ -5,7 +5,7 @@ The off-hand work uses vanilla items that Bedrock players can actually equip. It
 ## Implemented prototypes
 
 - **Defender I–III:** apply Resistance while a vanilla shield carrying the Defender marker is held in the off-hand. Normal shield blocking remains vanilla.
-- **Water Affinity I–III:** a nautilus shell carrying the Water Affinity marker grants Water Breathing and level-scaled Dolphin's Grace while held in the off-hand.
+- **Water Affinity I–III:** a nautilus shell carrying the Water Affinity marker grants Conduit Power for underwater breathing, visibility, and mining utility while held in the off-hand.
 
 The server reads the player's off-hand equipment through the Script API's `EquipmentSlot.Offhand`. Effects stop refreshing after the item is removed.
 
