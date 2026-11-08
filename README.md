@@ -20,6 +20,10 @@ A collection of gameplay additions and server-side utilities for **Minecraft Bed
 
 This project is not a Java Edition server plugin. Bedrock Behavior Packs are enabled per world. We maintain one shared pack build and register that same pack with each world that should use it; this provides a plugin-like workflow without claiming Bedrock has a globally loaded plugin system.
 
+## Guardian companions
+
+Players can summon one owner-bound vanilla wolf per dimension with `/innygr:companion summon` and dismiss it with `/innygr:companion dismiss`. The wolf is tamed to its summoner, so it recognizes that player as its owner and uses vanilla follow/defence behavior. It can defend its owner when threatened; the current server-only implementation does not force it to attack every other player on sight.
+
 ## Current prototypes
 
 - **Vitality I–III:** chestplate-based passive regeneration.
