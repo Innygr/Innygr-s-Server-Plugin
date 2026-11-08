@@ -2,29 +2,34 @@
 
 A collection of gameplay additions and server-side utilities for **Minecraft Bedrock Dedicated Server**, beginning with the **InnygrEnchantments** Behavior Pack.
 
-> **Status:** Early planning and scaffolding. Nothing in this repository should be considered a stable release yet.
+> **Status:** Early development. The first utility prototypes are implemented but not yet tested in-game.
+
+## Non-negotiable architecture
+
+**Server-side only.** This project uses a Behavior Pack with server-executed JavaScript. It does not include a Resource Pack, client-side scripts, custom textures, models, animations, or client downloads.
 
 ## Project goals
 
 - Add configurable, balanced utility enchantments to vanilla equipment.
-- Introduce custom knives as a lighter, faster alternative to vanilla swords.
-- Improve the usefulness of supported off-hand interactions.
-- Expand later with additional combat and rare/legendary enchantments.
+- Improve the usefulness of supported off-hand interactions without replacing vanilla behavior.
+- Expand later with additional non-weapon gameplay effects and rare/legendary enchantments.
 - Keep one maintained Behavior Pack source that can be enabled in multiple worlds.
 - Test changes on a separate world before deploying them to The Cat Server.
 
 ## Important Bedrock distinction
 
-This project is not a Java Edition server plugin. Bedrock Behavior Packs are enabled per world. We will maintain one shared pack build and register that same pack with each world that should use it; this gives us a plugin-like workflow without claiming that Bedrock has a globally loaded plugin system.
+This project is not a Java Edition server plugin. Bedrock Behavior Packs are enabled per world. We maintain one shared pack build and register that same pack with each world that should use it; this provides a plugin-like workflow without claiming Bedrock has a globally loaded plugin system.
 
-## Development priorities
+## Current prototype
 
-1. Utility enchantments
-2. Off-hand utility
-3. Custom knives and combat additions
-4. Legendary enchantments
+The first script prototypes two utility enchantments:
 
-See [the enchantment plan](docs/ENCHANTMENTS.md), [the knife design](docs/KNIVES.md), [the off-hand plan](docs/OFFHAND.md), and the [roadmap](ROADMAP.md).
+- **Vitality I–III:** chestplate-based passive regeneration.
+- **Aquatic I–III:** helmet-based Water Breathing and level-scaled Dolphin's Grace.
+
+Operators apply a prototype to the armor they are wearing with `/innygr:enchant <vitality|aquatic> <1-3>`.
+
+See [the enchantment plan](docs/ENCHANTMENTS.md), [the off-hand plan](docs/OFFHAND.md), and the [roadmap](ROADMAP.md).
 
 ## Repository layout
 
@@ -32,25 +37,26 @@ See [the enchantment plan](docs/ENCHANTMENTS.md), [the knife design](docs/KNIVES
 .
 ├── docs/
 │   ├── ENCHANTMENTS.md
-│   ├── KNIVES.md
 │   └── OFFHAND.md
+├── scripts/
+│   └── main.js
+├── manifest.json
 ├── CHANGELOG.md
 └── ROADMAP.md
 ```
 
-The actual Behavior Pack manifest and scripts will be added after the target Bedrock Script API version and supported mechanics are verified.
-
 ## Development principles
 
-- Use vanilla equipment as the base for enchantments; custom knives are an explicit addition to the initial scope.
+- Use vanilla equipment as the base for utility enchantments.
 - Keep features modular and individually testable.
+- Prefer stable Script APIs.
 - Avoid undocumented or experimental APIs unless clearly isolated and tested.
 - Back up worlds before deployment.
 - Never deploy an untested development build to the live world.
 
 ## Current target
 
-The Cat Server — Minecraft Bedrock Dedicated Server. The server is currently being stabilized, so pack deployment is intentionally on hold.
+The Cat Server — Minecraft Bedrock Dedicated Server 1.26.63.1. Pack deployment is on hold until the server is stable and a disposable test world is available.
 
 ## License
 
