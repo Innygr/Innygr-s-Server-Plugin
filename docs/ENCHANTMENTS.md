@@ -14,11 +14,28 @@ These are **server-managed enchantment effects** applied to vanilla items. They 
 | Defender I–III | Off-hand shield | Resistance while the vanilla shield is held | Implemented; needs in-game balance testing |
 | Water Affinity I–III | Off-hand nautilus shell | Water Breathing and level-scaled Conduit Power | Implemented; needs in-game balance testing |
 
-Multiple Innygr enchantments can now coexist on one compatible vanilla item. Reapplying an enchantment replaces only that enchantment's level.
+Multiple Innygr enchantments can coexist on one compatible vanilla item. Reapplying an enchantment replaces only that enchantment's level.
 
-## Prototype command
+## Endersteel armor progression
 
-Operators apply a prototype to the matching item held in their main hand or worn in the relevant armor slot:
+Endersteel is intended to be the End's counterpart to Netherite. In the current server-only prototype, it is represented by a hidden marker and visible lore on vanilla diamond armor; it is not yet a distinct item and does not change vanilla armor attributes, durability, or appearance.
+
+Operators upgrade one currently worn diamond armor piece at a time:
+
+```text
+/innygr:endersteel head
+/innygr:endersteel chest
+/innygr:endersteel legs
+/innygr:endersteel feet
+```
+
+All four pieces are required for **Voidbound**. When a fully upgraded player takes void damage, the server teleports them to the Overworld's default spawn, one block above the spawn position. The effect is disabled immediately when any one of the four Endersteel pieces is removed.
+
+Voidbound is a full-set bonus, not a normal enchantment level. The current implementation intentionally chooses Voidbound over a random teleport proc so the armor has a clear, predictable identity.
+
+## Prototype enchantment command
+
+Operators apply a prototype to the matching item held in the main hand or worn in the relevant armor slot:
 
 ```text
 /innygr:enchant vitality 1
@@ -55,6 +72,7 @@ The next candidates come from the agreed design pool drawing inspiration from **
 - Vitality, Aquatic, Safeguard, Springload, Defender, and Water Affinity are refreshed once per second per online player.
 - Defender uses the vanilla off-hand shield; Water Affinity uses a vanilla off-hand nautilus shell. Neither replaces vanilla equipment or requires client assets.
 - Prospector uses an event callback rather than a repeating block scan.
+- Endersteel markers are stored in armor lore and checked on void-damage events; no continuous void scan is used.
 - Effects and bonus drops are applied by the server; no client script or Resource Pack is used.
 - Lore markers are the current storage format. A later iteration may move metadata to item dynamic properties after compatibility testing.
 - Bedrock does not expose a general-purpose API for registering arbitrary native enchantment types, so the initial system emulates selected effects on vanilla items.
