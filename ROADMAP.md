@@ -23,6 +23,7 @@
 ## Phase 2 — Endersteel
 - [x] Add an Endersteel marker to equipped diamond armor pieces.
 - [x] Add Voidbound as a full-set bonus that returns players to the Overworld spawn on void damage.
+- [x] Add CI regression tests for Endersteel slot mapping and Voidbound event flow.
 - [ ] Test armor marker persistence and full-set detection in-game.
 - [ ] Verify void-damage event timing and cross-dimension teleport behavior in a disposable world.
 - [ ] Design a future custom-item/stat implementation if the project later permits resource and behavior assets.
