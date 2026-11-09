@@ -1,6 +1,18 @@
 # Changelog
 
 ## Unreleased
+### Added
+- Endersteel upgrade markers for each piece of equipped vanilla diamond armor.
+- Voidbound full-set bonus: void damage returns a fully equipped player to the Overworld's default spawn.
+- Operator command `/innygr:endersteel <head|chest|legs|feet>` to upgrade the matching worn armor piece.
+- Endersteel documentation and roadmap tracking.
+
+### Notes
+- Endersteel currently uses marked diamond armor and does not change vanilla armor stats, durability, or appearance.
+- Voidbound and all other prototypes require testing in a disposable world before live deployment.
+- No live server deployment or restart was performed.
+
+## Unreleased
 - Added `/innygr:companion summon` and `/innygr:companion dismiss` for one owner-bound vanilla wolf per dimension.
 - Guardian companions use vanilla taming, following, and owner-defence behavior.
 
