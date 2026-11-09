@@ -18,17 +18,5 @@ jobs:
           node-version: 22
       - name: Check JavaScript syntax
         run: node --input-type=module --check < scripts/main.js
-      - name: Validate manifest and server-only structure
-        run: |
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-
-          manifest = json.loads(Path("manifest.json").read_text())
-          assert len(manifest.get("modules", [])) == 1
-          assert manifest["modules"][0]["type"] == "script"
-          assert manifest["modules"][0]["entry"] == "scripts/main.js"
-          assert not Path("textures").exists()
-          assert not Path("resource_pack").exists()
-          print("Manifest valid; Behavior Pack remains server-side only.")
-          PY
+      - name: Run Behavior Pack regression tests
+        run: python3 -m unittest discover -s tests -v
