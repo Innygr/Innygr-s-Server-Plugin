@@ -71,6 +71,17 @@ See [the enchantment plan](docs/ENCHANTMENTS.md), [the off-hand plan](docs/OFFHA
 └── ROADMAP.md
 ```
 
+## Automated checks
+
+The repository includes lightweight contract tests for the Behavior Pack:
+
+```bash
+python3 -m unittest discover -s tests -v
+node --check scripts/main.js
+```
+
+GitHub Actions runs these checks on pushes and pull requests. The tests verify pack structure and important implementation contracts, including enchantment marker coexistence, effect refresh safeguards, Prospector rules, and Endersteel's Voidbound event flow. **Passing CI is not a substitute for in-game testing**: item lore persistence, command registration, effect behavior, and cross-dimension teleporting still need verification in a disposable Bedrock world.
+
 ## Development principles
 
 - Use vanilla equipment as the base for utility enchantments.
