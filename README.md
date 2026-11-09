@@ -2,7 +2,7 @@
 
 A collection of gameplay additions and server-side utilities for **Minecraft Bedrock Dedicated Server**, beginning with the **InnygrEnchantments** Behavior Pack.
 
-> **Status:** Early development. Vitality, Aquatic, and Prospector prototypes are implemented but not yet tested in-game.
+> **Status:** Early development. Utility enchantment prototypes and the Endersteel/Voidbound prototype are implemented but not yet tested in-game.
 
 ## Non-negotiable architecture
 
@@ -11,14 +11,29 @@ A collection of gameplay additions and server-side utilities for **Minecraft Bed
 ## Project goals
 
 - Add configurable, balanced utility enchantments to vanilla equipment.
+- Add an End-themed armor progression with a distinctive full-set bonus.
 - Improve the usefulness of supported off-hand interactions without replacing vanilla behavior.
-- Expand later with additional non-weapon gameplay effects and rare/legendary enchantments.
 - Keep one maintained Behavior Pack source that can be enabled in multiple worlds.
 - Test changes on a separate world before deploying them to The Cat Server.
 
 ## Important Bedrock distinction
 
 This project is not a Java Edition server plugin. Bedrock Behavior Packs are enabled per world. We maintain one shared pack build and register that same pack with each world that should use it; this provides a plugin-like workflow without claiming Bedrock has a globally loaded plugin system.
+
+Because this pack is server-side-only, Endersteel currently uses marked vanilla diamond armor as its base. The prototype adds its set bonus but **does not yet change vanilla armor attributes, durability, or appearance**. Those require a custom item/asset approach beyond the current pack scope.
+
+## Endersteel
+
+Endersteel is the End's equipment tier, intended as the counterpart to Netherite. Operators can upgrade each worn diamond armor piece with:
+
+```text
+/innygr:endersteel head
+/innygr:endersteel chest
+/innygr:endersteel legs
+/innygr:endersteel feet
+```
+
+Wearing all four marked pieces activates **Voidbound**: void damage returns the player to the Overworld's default spawn instead of leaving them in the void. The bonus is all-or-nothing; removing any Endersteel armor piece disables it.
 
 ## Guardian companions
 
