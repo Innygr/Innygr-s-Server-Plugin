@@ -56,6 +56,25 @@ class BehaviorPackContractTests(unittest.TestCase):
         self.assertIn("CommandPermissionLevel.Admin", command)
         self.assertIn("applyEndersteel(source, args[0])", command)
 
+    def test_enchantment_markers_are_scoped_per_enchantment(self):
+        self.assertIn('function getMarkerLine(enchantment, level)', SCRIPT)
+        self.assertIn('const markerPrefix = `${PACK_PREFIX}${enchantment}:`', SCRIPT)
+        self.assertIn('if (line.startsWith(markerPrefix))', SCRIPT)
+        self.assertIn('lore.push(getMarkerLine(enchantment, level))', SCRIPT)
+
+    def test_enchantment_levels_are_validated_before_application(self):
+        self.assertIn('!Number.isInteger(level) || level < 1 || level > definition.maxLevel', SCRIPT)
+        self.assertIn('ROMAN_LEVELS[level]', SCRIPT)
+
+    def test_effect_refresh_does_not_overwrite_stronger_effect(self):
+        self.assertIn('existing.amplifier > amplifier', SCRIPT)
+        self.assertIn('existing.duration > 25', SCRIPT)
+
+    def test_prospector_respects_silk_touch_and_level_chances(self):
+        self.assertIn('const PROSPECTOR_CHANCES = [0, 0.05, 0.10, 0.15]', SCRIPT)
+        self.assertIn('enchantable?.hasEnchantment("silk_touch")', SCRIPT)
+        self.assertIn('Math.random() >= PROSPECTOR_CHANCES[level]', SCRIPT)
+
 
 if __name__ == "__main__":
     unittest.main()
