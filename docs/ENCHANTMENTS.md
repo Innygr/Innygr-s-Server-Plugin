@@ -29,7 +29,7 @@ Operators upgrade one currently worn diamond armor piece at a time:
 /innygr:endersteel feet
 ```
 
-All four pieces are required for **Voidbound**. When a fully upgraded player takes void damage, the server teleports them to the Overworld's default spawn, one block above the spawn position. The effect is disabled immediately when any one of the four Endersteel pieces is removed.
+All four pieces are required for **Voidbound**. The pack listens to the cancellable `world.beforeEvents.entityHurt` event, cancels incoming void damage, and schedules the return to the Overworld's default spawn for the next script tick. The effect is disabled immediately when any one of the four Endersteel pieces is removed.
 
 Voidbound is a full-set bonus, not a normal enchantment level. The current implementation intentionally chooses Voidbound over a random teleport proc so the armor has a clear, predictable identity.
 
@@ -72,7 +72,7 @@ The next candidates come from the agreed design pool drawing inspiration from **
 - Vitality, Aquatic, Safeguard, Springload, Defender, and Water Affinity are refreshed once per second per online player.
 - Defender uses the vanilla off-hand shield; Water Affinity uses a vanilla off-hand nautilus shell. Neither replaces vanilla equipment or requires client assets.
 - Prospector uses an event callback rather than a repeating block scan.
-- Endersteel markers are stored in armor lore and checked on void-damage events; no continuous void scan is used.
+- Endersteel markers are stored in armor lore and checked on the cancellable before-hurt event; no continuous void scan is used. The damage is cancelled before the cross-dimension teleport is scheduled.
 - Effects and bonus drops are applied by the server; no client script or Resource Pack is used.
 - Lore markers are the current storage format. A later iteration may move metadata to item dynamic properties after compatibility testing.
 - Bedrock does not expose a general-purpose API for registering arbitrary native enchantment types, so the initial system emulates selected effects on vanilla items.
