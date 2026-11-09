@@ -66,6 +66,30 @@ const ENCHANTMENT_DEFINITIONS = {
 };
 
 const PROSPECTOR_CHANCES = [0, 0.05, 0.10, 0.15];
+const ENDERSTEEL_PIECES = {
+  head: {
+    slot: EquipmentSlot.Head,
+    typeId: "minecraft:diamond_helmet",
+    name: "diamond helmet",
+  },
+  chest: {
+    slot: EquipmentSlot.Chest,
+    typeId: "minecraft:diamond_chestplate",
+    name: "diamond chestplate",
+  },
+  legs: {
+    slot: EquipmentSlot.Legs,
+    typeId: "minecraft:diamond_leggings",
+    name: "diamond leggings",
+  },
+  feet: {
+    slot: EquipmentSlot.Feet,
+    typeId: "minecraft:diamond_boots",
+    name: "diamond boots",
+  },
+};
+const ENDERSTEEL_MARKER = `${PACK_PREFIX}endersteel]`;
+
 const ORE_BONUS_DROPS = {
   "minecraft:coal_ore": "minecraft:coal",
   "minecraft:deepslate_coal_ore": "minecraft:coal",
@@ -171,6 +195,80 @@ function applyEnchantment(player, enchantment, level) {
     CustomCommandStatus.Success,
     `Applied ${definition.displayName} ${ROMAN_LEVELS[level]}.`
   );
+}
+
+function hasEndersteel(item) {
+  if (!item) return false;
+  try {
+    return item.getLore().includes(ENDERSTEEL_MARKER);
+  } catch {
+    return false;
+  }
+}
+
+function applyEndersteel(player, pieceName) {
+  const piece = ENDERSTEEL_PIECES[pieceName];
+  if (!piece) {
+    return commandResult(CustomCommandStatus.Failure, "Choose head, chest, legs, or feet.");
+  }
+
+  const equippable = getEquippable(player);
+  if (!equippable) {
+    return commandResult(CustomCommandStatus.Failure, "Equipment access is unavailable.");
+  }
+
+  const item = equippable.getEquipment(piece.slot);
+  if (!item || item.typeId !== piece.typeId) {
+    return commandResult(
+      CustomCommandStatus.Failure,
+      `Wear a ${piece.name} in the matching armor slot first.`
+    );
+  }
+
+  if (hasEndersteel(item)) {
+    return commandResult(CustomCommandStatus.Failure, "That armor piece is already Endersteel.");
+  }
+
+  const lore = item.getLore();
+  lore.push("§7Endersteel");
+  lore.push(ENDERSTEEL_MARKER);
+  item.setLore(lore);
+  equippable.setEquipment(piece.slot, item);
+
+  return commandResult(
+    CustomCommandStatus.Success,
+    `Upgraded your diamond ${piece.name} to Endersteel.`
+  );
+}
+
+function hasFullEndersteelSet(equippable) {
+  return [
+    EquipmentSlot.Head,
+    EquipmentSlot.Chest,
+    EquipmentSlot.Legs,
+    EquipmentSlot.Feet,
+  ].every((slot) => hasEndersteel(equippable.getEquipment(slot)));
+}
+
+function handleVoidbound(event) {
+  try {
+    const player = event.hurtEntity;
+    if (!player || player.typeId !== "minecraft:player") return;
+    if (event.damageSource?.cause !== "void") return;
+
+    const equippable = getEquippable(player);
+    if (!equippable || !hasFullEndersteelSet(equippable)) return;
+
+    const spawn = world.getDefaultSpawnLocation();
+    const overworld = world.getDimension("overworld");
+    player.teleport(
+      { x: spawn.x, y: spawn.y + 1, z: spawn.z },
+      { dimension: overworld, checkForBlocks: true }
+    );
+    player.sendMessage("§5[Endersteel] §rVoidbound returned you to the Overworld.");
+  } catch {
+    // Never interrupt normal damage handling if a teleport cannot be completed.
+  }
 }
 
 function applyEffectIfNeeded(player, effectId, amplifier) {
@@ -362,6 +460,33 @@ system.beforeEvents.startup.subscribe((event) => {
     }
   );
 
+  registry.registerEnum("innygr:endersteel_piece", ["head", "chest", "legs", "feet"]);
+
+  registry.registerCommand(
+    {
+      name: "innygr:endersteel",
+      description: "Upgrade one equipped diamond armor piece to Endersteel.",
+      permissionLevel: CommandPermissionLevel.Admin,
+      cheatsRequired: false,
+      mandatoryParameters: [
+        {
+          type: CustomCommandParamType.Enum,
+          name: "innygr:endersteel_piece",
+        },
+      ],
+    },
+    (origin, args) => {
+      const source = origin.sourceEntity;
+      if (!source || source.typeId !== "minecraft:player") {
+        return commandResult(
+          CustomCommandStatus.Failure,
+          "Run this command in-game as a player."
+        );
+      }
+      return applyEndersteel(source, args[0]);
+    }
+  );
+
   registry.registerEnum("innygr:enchantment", [
     "vitality",
     "aquatic",
@@ -404,6 +529,7 @@ system.beforeEvents.startup.subscribe((event) => {
 });
 
 world.afterEvents.playerBreakBlock.subscribe(handleProspectorBlockBreak);
+world.afterEvents.entityHurt.subscribe(handleVoidbound);
 
 // One check per second per online player. No client-side scripts or assets.
 system.runInterval(() => {
