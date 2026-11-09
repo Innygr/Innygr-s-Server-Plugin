@@ -2,6 +2,7 @@
 
 ## Unreleased
 ### Added
+- Static regression tests for manifest structure, server-only packaging, Endersteel armor slots, Voidbound event cancellation, and admin-only upgrade commands.
 - Endersteel upgrade markers for each piece of equipped vanilla diamond armor.
 - Voidbound full-set bonus: void damage returns a fully equipped player to the Overworld's default spawn.
 - Operator command `/innygr:endersteel <head|chest|legs|feet>` to upgrade the matching worn armor piece.
