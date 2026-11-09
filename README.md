@@ -33,7 +33,7 @@ Endersteel is the End's equipment tier, intended as the counterpart to Netherite
 /innygr:endersteel feet
 ```
 
-Wearing all four marked pieces activates **Voidbound**: void damage returns the player to the Overworld's default spawn instead of leaving them in the void. The bonus is all-or-nothing; removing any Endersteel armor piece disables it.
+Wearing all four marked pieces activates **Voidbound**: the pack cancels incoming void damage before it is applied, then returns the player to the Overworld's default spawn on the next script tick. The bonus is all-or-nothing; removing any Endersteel armor piece disables it.
 
 ## Guardian companions
 
