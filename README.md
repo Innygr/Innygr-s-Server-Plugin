@@ -64,6 +64,8 @@ See [the enchantment plan](docs/ENCHANTMENTS.md), [the off-hand plan](docs/OFFHA
 │   └── OFFHAND.md
 ├── scripts/
 │   └── main.js
+├── tests/
+│   └── test_pack.py
 ├── manifest.json
 ├── CHANGELOG.md
 └── ROADMAP.md
