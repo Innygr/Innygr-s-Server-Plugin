@@ -259,15 +259,26 @@ function handleVoidbound(event) {
     const equippable = getEquippable(player);
     if (!equippable || !hasFullEndersteelSet(equippable)) return;
 
-    const spawn = world.getDefaultSpawnLocation();
-    const overworld = world.getDimension("overworld");
-    player.teleport(
-      { x: spawn.x, y: spawn.y + 1, z: spawn.z },
-      { dimension: overworld, checkForBlocks: true }
-    );
-    player.sendMessage("§5[Endersteel] §rVoidbound returned you to the Overworld.");
+    // Cancel the void hit first so lethal damage cannot win the race against
+    // the cross-dimension teleport. The actual teleport runs next tick because
+    // before-event callbacks must not directly modify world state.
+    event.cancel = true;
+    system.run(() => {
+      try {
+        if (!player.isValid()) return;
+        const spawn = world.getDefaultSpawnLocation();
+        const overworld = world.getDimension("overworld");
+        player.teleport(
+          { x: spawn.x, y: spawn.y + 1, z: spawn.z },
+          { dimension: overworld, checkForBlocks: true }
+        );
+        player.sendMessage("§5[Endersteel] §rVoidbound returned you to the Overworld.");
+      } catch {
+        // A failed teleport must not interrupt the server tick.
+      }
+    });
   } catch {
-    // Never interrupt normal damage handling if a teleport cannot be completed.
+    // Never interrupt normal damage handling if the event cannot be processed.
   }
 }
 
@@ -529,7 +540,7 @@ system.beforeEvents.startup.subscribe((event) => {
 });
 
 world.afterEvents.playerBreakBlock.subscribe(handleProspectorBlockBreak);
-world.afterEvents.entityHurt.subscribe(handleVoidbound);
+world.beforeEvents.entityHurt.subscribe(handleVoidbound);
 
 // One check per second per online player. No client-side scripts or assets.
 system.runInterval(() => {
