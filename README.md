@@ -97,4 +97,4 @@ The Cat Server — Minecraft Bedrock Dedicated Server 1.26.63.1. Pack deployment
 
 ## License
 
-License selection is pending.
+Released under the MIT License; see [LICENSE](LICENSE).
