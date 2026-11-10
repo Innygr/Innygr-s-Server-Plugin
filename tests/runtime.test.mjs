@@ -12,11 +12,13 @@ const source = fs.readFileSync(sourcePath, "utf8").replace(
   ""
 );
 
-function createHarness() {
+function createHarness(randomValue = 0) {
   const callbacks = { startup: null, voidbound: null, blockBreak: null, interval: null };
   const commands = new Map();
   const enums = new Map();
   const scheduled = [];
+  const math = Object.create(Math);
+  math.random = () => randomValue;
   const EquipmentSlot = {
     Head: "Head", Chest: "Chest", Legs: "Legs", Feet: "Feet",
     Mainhand: "Mainhand", Offhand: "Offhand",
@@ -53,7 +55,7 @@ function createHarness() {
     ItemStack,
     system,
     world,
-    Math,
+    Math: math,
   };
   vm.runInNewContext(source, context, { filename: sourcePath });
   callbacks.startup({
@@ -65,12 +67,14 @@ function createHarness() {
   return { callbacks, commands, enums, scheduled, EquipmentSlot, world };
 }
 
-function makeItem(typeId, lore = []) {
+function makeItem(typeId, lore = [], options = {}) {
   return {
     typeId,
     getLore: () => [...lore],
     setLore: (next) => { lore = [...next]; },
-    getComponent: () => null,
+    getComponent: (id) => id === "minecraft:enchantable" && options.silkTouch
+      ? { hasEnchantment: (name) => name === "silk_touch" }
+      : null,
     lore: () => [...lore],
   };
 }
@@ -179,4 +183,69 @@ test("Voidbound leaves non-void damage uncancelled", () => {
   h.callbacks.voidbound(event);
   assert.equal(event.cancel, false);
   assert.equal(h.scheduled.length, 0);
+});
+
+
+function makeBlockBreakEvent(tool, blockId = "minecraft:coal_ore") {
+  const drops = [];
+  const event = {
+    itemStackBeforeBreak: tool,
+    brokenBlockPermutation: { type: { id: blockId } },
+    block: { location: { x: 4, y: 12, z: -3 } },
+    dimension: {
+      spawnItem: (item, location) => drops.push({ item, location }),
+    },
+  };
+  return { event, drops };
+}
+
+test("Prospector creates the configured bonus drop for a qualifying ore", () => {
+  const h = createHarness(0);
+  const tool = makeItem("minecraft:diamond_pickaxe", ["§0[IE:prospector:1]"]);
+  const { event, drops } = makeBlockBreakEvent(tool);
+  h.callbacks.blockBreak(event);
+  assert.equal(drops.length, 1);
+  assert.equal(drops[0].item.typeId, "minecraft:coal");
+  assert.deepEqual(drops[0].location, { x: 4.5, y: 12.5, z: -2.5 });
+});
+
+test("Prospector does not add a bonus drop when the pickaxe has Silk Touch", () => {
+  const h = createHarness(0);
+  const tool = makeItem(
+    "minecraft:diamond_pickaxe",
+    ["§0[IE:prospector:3]"],
+    { silkTouch: true }
+  );
+  const { event, drops } = makeBlockBreakEvent(tool, "minecraft:diamond_ore");
+  h.callbacks.blockBreak(event);
+  assert.equal(drops.length, 0);
+});
+
+test("Prospector ignores blocks without a configured ore drop", () => {
+  const h = createHarness(0);
+  const tool = makeItem("minecraft:diamond_pickaxe", ["§0[IE:prospector:3]"]);
+  const { event, drops } = makeBlockBreakEvent(tool, "minecraft:stone");
+  h.callbacks.blockBreak(event);
+  assert.equal(drops.length, 0);
+});
+
+test("Prospector respects its configured random bonus chance", () => {
+  const succeeds = createHarness(0.049);
+  const levelOneTool = makeItem("minecraft:iron_pickaxe", ["§0[IE:prospector:1]"]);
+  const success = makeBlockBreakEvent(levelOneTool);
+  succeeds.callbacks.blockBreak(success.event);
+  assert.equal(success.drops.length, 1);
+
+  const boundary = createHarness(0.05);
+  const atBoundary = makeBlockBreakEvent(levelOneTool);
+  boundary.callbacks.blockBreak(atBoundary.event);
+  assert.equal(atBoundary.drops.length, 0);
+});
+
+test("Prospector ignores unmarked tools", () => {
+  const h = createHarness(0);
+  const tool = makeItem("minecraft:diamond_pickaxe");
+  const { event, drops } = makeBlockBreakEvent(tool);
+  h.callbacks.blockBreak(event);
+  assert.equal(drops.length, 0);
 });
