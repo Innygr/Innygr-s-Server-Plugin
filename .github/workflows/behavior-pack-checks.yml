@@ -18,5 +18,7 @@ jobs:
           node-version: 22
       - name: Check JavaScript syntax
         run: node --input-type=module --check < scripts/main.js
+      - name: Run mocked Script API runtime tests
+        run: node --test tests/runtime.test.mjs
       - name: Run Behavior Pack regression tests
         run: python3 -m unittest discover -s tests -v
