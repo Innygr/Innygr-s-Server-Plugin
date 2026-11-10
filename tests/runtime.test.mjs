@@ -251,3 +251,95 @@ test("Prospector ignores unmarked tools", () => {
   h.callbacks.blockBreak(event);
   assert.equal(drops.length, 0);
 });
+
+
+function makeCompanionPlayer(id, name, dimensionId = "overworld") {
+  const entities = [];
+  const dimension = {
+    id: dimensionId,
+    getEntities: ({ type }) => entities.filter((entity) => entity.typeId === type && entity.valid),
+    spawnEntity: (typeId, location) => {
+      const wolf = {
+        id: `wolf-${entities.length + 1}`,
+        typeId,
+        location,
+        valid: true,
+        nameTag: "",
+        tameable: {
+          tamedToPlayerId: undefined,
+          tame: (owner) => {
+            wolf.tameable.tamedToPlayerId = owner.id;
+            return true;
+          },
+        },
+        getComponent: (component) => component === "tameable" ? wolf.tameable : null,
+        remove: () => { wolf.valid = false; },
+      };
+      entities.push(wolf);
+      return wolf;
+    },
+    entities,
+  };
+  return {
+    id,
+    name,
+    typeId: "minecraft:player",
+    location: { x: 10, y: 70, z: 10 },
+    dimension,
+  };
+}
+
+test("companion summon spawns and binds one guardian wolf to its owner", () => {
+  const h = createHarness();
+  const player = makeCompanionPlayer("owner-1", "Tester");
+  const result = h.commands.get("innygr:companion").callback(
+    { sourceEntity: player }, ["summon"]
+  );
+  const wolves = player.dimension.getEntities({ type: "minecraft:wolf" });
+  assert.equal(result.status, 0);
+  assert.equal(wolves.length, 1);
+  assert.equal(wolves[0].tameable.tamedToPlayerId, player.id);
+  assert.equal(wolves[0].nameTag, "Tester's Guardian");
+});
+
+test("companion summon prevents a second owned wolf in the same dimension", () => {
+  const h = createHarness();
+  const player = makeCompanionPlayer("owner-1", "Tester");
+  const command = h.commands.get("innygr:companion").callback;
+  assert.equal(command({ sourceEntity: player }, ["summon"]).status, 0);
+  const second = command({ sourceEntity: player }, ["summon"]);
+  assert.equal(second.status, 1);
+  assert.equal(player.dimension.entities.length, 1);
+});
+
+test("companion dismissal removes only the requesting player's companion", () => {
+  const h = createHarness();
+  const player = makeCompanionPlayer("owner-1", "Tester");
+  const otherPlayer = makeCompanionPlayer("owner-2", "Other");
+  const command = h.commands.get("innygr:companion").callback;
+  command({ sourceEntity: player }, ["summon"]);
+  command({ sourceEntity: otherPlayer }, ["summon"]);
+  const ownWolf = player.dimension.entities[0];
+  const otherWolf = otherPlayer.dimension.entities[0];
+
+  const result = command({ sourceEntity: player }, ["dismiss"]);
+  assert.equal(result.status, 0);
+  assert.equal(ownWolf.valid, false);
+  assert.equal(otherWolf.valid, true);
+});
+
+test("companion ownership is scoped to the player's current dimension", () => {
+  const h = createHarness();
+  const player = makeCompanionPlayer("owner-1", "Tester", "overworld");
+  const netherPlayer = makeCompanionPlayer("owner-1", "Tester", "nether");
+  const command = h.commands.get("innygr:companion").callback;
+
+  assert.equal(command({ sourceEntity: player }, ["summon"]).status, 0);
+  assert.equal(command({ sourceEntity: netherPlayer }, ["summon"]).status, 0);
+  assert.equal(player.dimension.entities.length, 1);
+  assert.equal(netherPlayer.dimension.entities.length, 1);
+
+  command({ sourceEntity: player }, ["dismiss"]);
+  assert.equal(player.dimension.entities[0].valid, false);
+  assert.equal(netherPlayer.dimension.entities[0].valid, true);
+});
