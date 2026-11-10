@@ -22,6 +22,7 @@
 - Operator command `/innygr:endersteel <head|chest|legs|feet>` to upgrade the matching worn armor piece.
 - Endersteel documentation and roadmap tracking.
 - Static regression tests for manifest structure, server-only packaging, enchantment behavior, Endersteel, and companion ownership rules.
+- Mocked runtime coverage for Endersteel upgrade validation and Voidbound full-set and invalid-player handling.
 
 ### Notes
 - Endersteel currently uses marked diamond armor and does not change vanilla armor stats, durability, or appearance.
