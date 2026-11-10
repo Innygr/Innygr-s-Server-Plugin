@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- Runtime regressions for enchantment reapplication, shared-effect priority, refresh timing, and natural effect expiry after gear removal.
+- Prospector threshold tests for all three levels, plus deepslate and Nether ore mapping coverage.
+- Package-builder protection and regression tests preventing output paths from overwriting source files.
 - Deterministic `.mcpack` packaging containing only the manifest and server script.
 - GitHub Actions artifact upload for the built pack (14-day retention).
 - Disposable-world testing guide covering commands, enchantments, Endersteel, companions, and the deployment gate.
@@ -31,6 +34,7 @@
 ### Notes
 - Endersteel currently uses marked diamond armor and does not change vanilla armor stats, durability, or appearance.
 - No Resource Pack, client-side scripts, custom textures, or client downloads are included.
+- Removing enchanted gear stops effect refresh; any remaining short-duration effect expires naturally rather than being forcibly cleared.
 - Prototype behavior has not yet been tested in a disposable world or on The Cat Server.
 - Voidbound and all other prototypes require testing in a disposable world before live deployment.
 - No live server deployment or restart was performed.
