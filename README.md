@@ -65,6 +65,7 @@ See [the enchantment plan](docs/ENCHANTMENTS.md), [the off-hand plan](docs/OFFHA
 ├── scripts/
 │   └── main.js
 ├── tests/
+│   ├── runtime.test.mjs
 │   └── test_pack.py
 ├── manifest.json
 ├── CHANGELOG.md
@@ -73,14 +74,17 @@ See [the enchantment plan](docs/ENCHANTMENTS.md), [the off-hand plan](docs/OFFHA
 
 ## Automated checks
 
-The repository includes lightweight contract tests for the Behavior Pack:
+Run the checks locally:
 
 ```bash
+node --input-type=module --check < scripts/main.js
+node --test tests/runtime.test.mjs
 python3 -m unittest discover -s tests -v
-node --check scripts/main.js
 ```
 
-GitHub Actions runs these checks on pushes and pull requests. The tests verify pack structure and important implementation contracts, including enchantment marker coexistence, effect refresh safeguards, Prospector rules, and Endersteel's Voidbound event flow. **Passing CI is not a substitute for in-game testing**: item lore persistence, command registration, effect behavior, and cross-dimension teleporting still need verification in a disposable Bedrock world.
+GitHub Actions runs all three checks on pushes and pull requests. The Node runtime suite evaluates the actual script with a small mocked Bedrock Script API surface and exercises command registration, enchantment application, effect refresh safeguards, and Voidbound event flow. Python tests continue to check pack structure and implementation contracts.
+
+**Passing CI is not a substitute for in-game testing.** The mock harness cannot prove real Bedrock command registration, item lore persistence, entity behavior, or cross-dimension teleporting. Those still need verification in a disposable Bedrock world.
 
 ## Development principles
 
