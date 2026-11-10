@@ -20,6 +20,7 @@
 - [ ] Implement the remaining approved candidate enchantments where stable API support exists.
 - [x] Add CI regression coverage for marker coexistence, level validation, effect refresh safeguards, and Prospector rules.
 - [ ] Test multi-enchantment lore persistence, command registration, effects, and ore drops in a disposable world.
+- [x] Add deterministic `.mcpack` packaging and CI artifact upload.
 
 ## Phase 2 — Endersteel
 - [x] Add an Endersteel marker to equipped diamond armor pieces.
@@ -47,7 +48,8 @@
 - [ ] Add configuration and compatibility documentation.
 
 ## Phase 6 — Release
-- [ ] Test on a disposable world.
+- [ ] Test on a disposable world using [the verification guide](docs/TESTING.md).
 - [ ] Test multiplayer behavior and performance.
-- [ ] Package a release-ready `.mcpack`.
+- [x] Add repeatable `.mcpack` packaging.
+- [ ] Promote a disposable-world-verified build to a release-ready `.mcpack`.
 - [ ] Deploy to The Cat Server only after a verified backup.
