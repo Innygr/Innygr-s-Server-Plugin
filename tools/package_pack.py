@@ -25,6 +25,9 @@ def build_pack(output_path: Path) -> Path:
         raise FileNotFoundError("Missing scripts/main.js.")
 
     output_path = output_path.resolve()
+    protected_paths = {(ROOT / relative_path).resolve() for relative_path in PACK_FILES}
+    if output_path in protected_paths:
+        raise ValueError("Output path must not overwrite a pack source file.")
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with ZipFile(output_path, "w") as archive:
         for relative_path in PACK_FILES:
