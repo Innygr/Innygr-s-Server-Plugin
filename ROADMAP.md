@@ -4,7 +4,7 @@
 - [x] Create the development branch.
 - [x] Establish project scope and development priorities.
 - [x] Confirm a stable Script API baseline: `@minecraft/server` 2.10.0.
-- [ ] Select and add a license.
+- [x] Select and add the MIT License.
 - [x] Add the Behavior Pack manifest and script entry point.
 - [x] Keep the pack server-side only: no Resource Pack or client-side scripts.
 
@@ -18,6 +18,7 @@
 - [x] Implement Defender for vanilla off-hand shields.
 - [x] Implement Water Affinity for vanilla off-hand nautilus shells.
 - [ ] Implement the remaining approved candidate enchantments where stable API support exists.
+- [x] Add CI regression coverage for marker coexistence, level validation, effect refresh safeguards, and Prospector rules.
 - [ ] Test multi-enchantment lore persistence, command registration, effects, and ore drops in a disposable world.
 
 ## Phase 2 — Endersteel
