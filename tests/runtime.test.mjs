@@ -389,3 +389,79 @@ test("companion summon reports spawn failures without throwing", () => {
   );
   assert.equal(result.status, 1);
 });
+
+
+test("Endersteel upgrades the matching worn diamond armor piece", () => {
+  const h = createHarness();
+  const helmet = makeItem("minecraft:diamond_helmet", ["Existing lore"]);
+  const player = makePlayer({ Head: helmet });
+  const result = h.commands.get("innygr:endersteel").callback(
+    { sourceEntity: player }, ["head"]
+  );
+  assert.equal(result.status, 0);
+  assert.ok(player.slots.get("Head").lore().includes("§7Endersteel"));
+  assert.ok(player.slots.get("Head").lore().includes("§0[IE:endersteel]"));
+  assert.ok(player.slots.get("Head").lore().includes("Existing lore"));
+});
+
+test("Endersteel rejects the wrong armor type without changing its lore", () => {
+  const h = createHarness();
+  const boots = makeItem("minecraft:iron_boots");
+  const player = makePlayer({ Feet: boots });
+  const result = h.commands.get("innygr:endersteel").callback(
+    { sourceEntity: player }, ["feet"]
+  );
+  assert.equal(result.status, 1);
+  assert.deepEqual(boots.lore(), []);
+});
+
+test("Endersteel cannot be applied twice to the same armor piece", () => {
+  const h = createHarness();
+  const helmet = makeItem("minecraft:diamond_helmet", ["§0[IE:endersteel]"]);
+  const player = makePlayer({ Head: helmet });
+  const result = h.commands.get("innygr:endersteel").callback(
+    { sourceEntity: player }, ["head"]
+  );
+  assert.equal(result.status, 1);
+  assert.deepEqual(helmet.lore(), ["§0[IE:endersteel]"]);
+});
+
+test("Voidbound requires all four Endersteel armor pieces", () => {
+  const h = createHarness();
+  const marked = (id) => makeItem(id, ["§0[IE:endersteel]"]);
+  const player = makePlayer({
+    Head: marked("minecraft:diamond_helmet"),
+    Chest: marked("minecraft:diamond_chestplate"),
+    Legs: marked("minecraft:diamond_leggings"),
+    Feet: makeItem("minecraft:diamond_boots"),
+  });
+  const event = {
+    hurtEntity: player,
+    damageSource: { cause: "void" },
+    cancel: false,
+  };
+  h.callbacks.voidbound(event);
+  assert.equal(event.cancel, false);
+  assert.equal(h.scheduled.length, 0);
+});
+
+test("Voidbound skips teleport if the player becomes invalid before the scheduled task", () => {
+  const h = createHarness();
+  const marked = (id) => makeItem(id, ["§0[IE:endersteel]"]);
+  const player = makePlayer({
+    Head: marked("minecraft:diamond_helmet"),
+    Chest: marked("minecraft:diamond_chestplate"),
+    Legs: marked("minecraft:diamond_leggings"),
+    Feet: marked("minecraft:diamond_boots"),
+  });
+  const event = {
+    hurtEntity: player,
+    damageSource: { cause: "void" },
+    cancel: false,
+  };
+  h.callbacks.voidbound(event);
+  assert.equal(event.cancel, true);
+  player.isValid = () => false;
+  h.scheduled[0]();
+  assert.equal(player.teleported, undefined);
+});
