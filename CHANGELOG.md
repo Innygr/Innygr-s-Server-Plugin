@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- Deterministic `.mcpack` packaging containing only the manifest and server script.
+- GitHub Actions artifact upload for the built pack (14-day retention).
+- Disposable-world testing guide covering commands, enchantments, Endersteel, companions, and the deployment gate.
+- Regression tests for archive contents and reproducible package output.
 - Initial server-only Behavior Pack manifest using stable `@minecraft/server` 2.10.0.
 - Operator command `/innygr:enchant` for applying utility prototypes to compatible vanilla equipment.
 - Vitality I–III chestplate regeneration prototype.
