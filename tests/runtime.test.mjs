@@ -343,3 +343,24 @@ test("companion ownership is scoped to the player's current dimension", () => {
   assert.equal(player.dimension.entities[0].valid, false);
   assert.equal(netherPlayer.dimension.entities[0].valid, true);
 });
+
+
+test("companion summon cleans up the spawned entity if ownership binding fails", () => {
+  const h = createHarness();
+  const player = makeCompanionPlayer("owner-1", "Tester");
+  const spawned = {
+    valid: true,
+    getComponent: () => ({ tame: () => false }),
+    remove: () => { spawned.valid = false; },
+  };
+  player.dimension.spawnEntity = () => {
+    player.dimension.entities.push(spawned);
+    return spawned;
+  };
+
+  const result = h.commands.get("innygr:companion").callback(
+    { sourceEntity: player }, ["summon"]
+  );
+  assert.equal(result.status, 1);
+  assert.equal(spawned.valid, false);
+});
