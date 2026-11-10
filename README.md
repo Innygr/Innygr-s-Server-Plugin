@@ -82,7 +82,7 @@ node --test tests/runtime.test.mjs
 python3 -m unittest discover -s tests -v
 ```
 
-GitHub Actions runs all three checks on pushes and pull requests. The Node runtime suite evaluates the actual script with a small mocked Bedrock Script API surface and exercises command registration, enchantment application, effect refresh safeguards, Prospector drops and Silk Touch handling, guardian companion ownership/summon/dismiss edge cases, and Voidbound event flow. Python tests continue to check pack structure and implementation contracts.
+GitHub Actions runs all three checks on pushes and pull requests. The Node runtime suite evaluates the actual script with a small mocked Bedrock Script API surface and exercises command registration, enchantment application, effect refresh safeguards, Prospector drops and Silk Touch handling, guardian companion ownership/summon/dismiss edge cases, Endersteel upgrade validation, and Voidbound full-set/invalid-player event flow. Python tests continue to check pack structure and implementation contracts.
 
 **Passing CI is not a substitute for in-game testing.** The mock harness cannot prove real Bedrock command registration, item lore persistence, entity behavior, or cross-dimension teleporting. Those still need verification in a disposable Bedrock world.
 
