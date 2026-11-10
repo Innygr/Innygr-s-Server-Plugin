@@ -101,3 +101,65 @@ class BehaviorPackContractTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PackArchiveTests(unittest.TestCase):
+    def test_builder_creates_minimal_valid_mcpack(self):
+        import subprocess
+        import sys
+        import zipfile
+        from tempfile import TemporaryDirectory
+
+        with TemporaryDirectory() as temporary:
+            output = Path(temporary) / "InnygrEnchantments.mcpack"
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "tools" / "package_pack.py"),
+                    "--output",
+                    str(output),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            with zipfile.ZipFile(output) as archive:
+                self.assertEqual(
+                    set(archive.namelist()),
+                    {"manifest.json", "scripts/main.js"},
+                )
+                self.assertEqual(
+                    archive.read("manifest.json"),
+                    (ROOT / "manifest.json").read_bytes(),
+                )
+                self.assertEqual(
+                    archive.read("scripts/main.js"),
+                    (ROOT / "scripts" / "main.js").read_bytes(),
+                )
+                self.assertEqual(archive.testzip(), None)
+
+    def test_builder_output_is_reproducible(self):
+        import hashlib
+        import subprocess
+        import sys
+        from tempfile import TemporaryDirectory
+
+        with TemporaryDirectory() as temporary:
+            outputs = [Path(temporary) / f"build-{index}.mcpack" for index in range(2)]
+            for output in outputs:
+                subprocess.run(
+                    [
+                        sys.executable,
+                        str(ROOT / "tools" / "package_pack.py"),
+                        "--output",
+                        str(output),
+                    ],
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+            digests = [
+                hashlib.sha256(output.read_bytes()).hexdigest()
+                for output in outputs
+            ]
+            self.assertEqual(digests[0], digests[1])
