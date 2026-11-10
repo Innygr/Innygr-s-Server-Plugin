@@ -10,6 +10,7 @@ import {
 } from "@minecraft/server";
 
 const PACK_PREFIX = "§0[IE:";
+const MAX_LORE_LINES = 20;
 const ROMAN_LEVELS = ["", "I", "II", "III"];
 
 const ENCHANTMENT_DEFINITIONS = {
@@ -117,12 +118,45 @@ function commandResult(status, message) {
   return { status, message };
 }
 
+// Custom command callbacks run in a restricted "before" context. Queue all
+// state-changing work for the next normal script tick.
+function queuePlayerAction(player, action) {
+  system.run(() => {
+    try {
+      if (!player.isValid) return;
+      const result = action();
+      const prefix =
+        result.status === CustomCommandStatus.Success ? "§a[Innygr] §r" : "§c[Innygr] §r";
+      player.sendMessage(`${prefix}${result.message}`);
+    } catch {
+      try {
+        if (player.isValid) {
+          player.sendMessage("§c[Innygr] The server could not complete that request.");
+        }
+      } catch {
+        // The player may have disconnected before the result could be sent.
+      }
+    }
+  });
+
+  return commandResult(
+    CustomCommandStatus.Success,
+    "Request queued. Check chat for the result."
+  );
+}
+
 function getEquippable(player) {
   return player.getComponent(EntityComponentTypes.Equippable);
 }
 
 function getMarkerLine(enchantment, level) {
   return `${PACK_PREFIX}${enchantment}:${level}]`;
+}
+
+function getLoreEntryText(entry) {
+  if (typeof entry === "string") return entry;
+  if (entry && typeof entry.text === "string") return entry.text;
+  return undefined;
 }
 
 function readEnchantmentLevel(item, enchantment) {
@@ -133,7 +167,9 @@ function readEnchantmentLevel(item, enchantment) {
       `^\\u00A70\\[IE:${enchantment}:([1-3])\\]$`
     );
 
-    for (const line of item.getLore()) {
+    for (const entry of item.getRawLore()) {
+      const line = getLoreEntryText(entry);
+      if (typeof line !== "string") continue;
       const match = line.match(marker);
       if (match) return Number(match[1]);
     }
@@ -177,14 +213,27 @@ function applyEnchantment(player, enchantment, level) {
   // carry multiple Innygr enchantments at once.
   const markerPrefix = `${PACK_PREFIX}${enchantment}:`;
   const lore = [];
-  for (const line of item.getLore()) {
-    if (line.startsWith(markerPrefix)) {
-      if (lore.length && lore[lore.length - 1].startsWith(`§7${definition.displayName} `)) {
+  for (const entry of item.getRawLore()) {
+    const line = getLoreEntryText(entry);
+    if (typeof line === "string" && line.startsWith(markerPrefix)) {
+      const previousLine = getLoreEntryText(lore[lore.length - 1]);
+      if (
+        typeof previousLine === "string" &&
+        previousLine.startsWith(`§7${definition.displayName} `)
+      ) {
         lore.pop();
       }
       continue;
     }
-    lore.push(line);
+    // Keep non-string RawMessage lore intact instead of flattening or
+    // rebuilding the player's existing translated/structured tooltip text.
+    lore.push(entry);
+  }
+  if (lore.length + 2 > MAX_LORE_LINES) {
+    return commandResult(
+      CustomCommandStatus.Failure,
+      "This item's lore is full. Remove a lore line before applying an Innygr enchantment."
+    );
   }
   lore.push(`§7${definition.displayName} ${ROMAN_LEVELS[level]}`);
   lore.push(getMarkerLine(enchantment, level));
@@ -200,7 +249,9 @@ function applyEnchantment(player, enchantment, level) {
 function hasEndersteel(item) {
   if (!item) return false;
   try {
-    return item.getLore().includes(ENDERSTEEL_MARKER);
+    return item.getRawLore().some(
+      (entry) => getLoreEntryText(entry) === ENDERSTEEL_MARKER
+    );
   } catch {
     return false;
   }
@@ -229,7 +280,13 @@ function applyEndersteel(player, pieceName) {
     return commandResult(CustomCommandStatus.Failure, "That armor piece is already Endersteel.");
   }
 
-  const lore = item.getLore();
+  const lore = item.getRawLore();
+  if (lore.length + 2 > MAX_LORE_LINES) {
+    return commandResult(
+      CustomCommandStatus.Failure,
+      "This item's lore is full. Remove a lore line before upgrading it to Endersteel."
+    );
+  }
   lore.push("§7Endersteel");
   lore.push(ENDERSTEEL_MARKER);
   item.setLore(lore);
@@ -242,12 +299,33 @@ function applyEndersteel(player, pieceName) {
 }
 
 function hasFullEndersteelSet(equippable) {
-  return [
-    EquipmentSlot.Head,
-    EquipmentSlot.Chest,
-    EquipmentSlot.Legs,
-    EquipmentSlot.Feet,
-  ].every((slot) => hasEndersteel(equippable.getEquipment(slot)));
+  return Object.values(ENDERSTEEL_PIECES).every((piece) => {
+    const item = equippable.getEquipment(piece.slot);
+    return item?.typeId === piece.typeId && hasEndersteel(item);
+  });
+}
+
+function getVoidboundDestination() {
+  const spawn = world.getDefaultSpawnLocation();
+  const overworld = world.getDimension("overworld");
+  let y = spawn.y + 1;
+
+  // Bedrock uses 32767 as a sentinel when the default spawn height should be
+  // selected from terrain. Never try to teleport to sentinel + 1.
+  if (spawn.y === 32767) {
+    const surface = overworld.getTopmostBlock({ x: spawn.x, z: spawn.z });
+    if (!surface || surface.isLiquid) return undefined;
+
+    y = surface.y + 1;
+    const feetBlock = overworld.getBlock({ x: spawn.x, y, z: spawn.z });
+    const headBlock = overworld.getBlock({ x: spawn.x, y: y + 1, z: spawn.z });
+    if (!feetBlock?.isAir || !headBlock?.isAir) return undefined;
+  }
+
+  return {
+    dimension: overworld,
+    location: { x: spawn.x, y, z: spawn.z },
+  };
 }
 
 function handleVoidbound(event) {
@@ -259,19 +337,20 @@ function handleVoidbound(event) {
     const equippable = getEquippable(player);
     if (!equippable || !hasFullEndersteelSet(equippable)) return;
 
-    // Cancel the void hit first so lethal damage cannot win the race against
-    // the cross-dimension teleport. The actual teleport runs next tick because
-    // before-event callbacks must not directly modify world state.
+    // Resolve the destination before cancelling damage. If the automatic
+    // world-spawn height cannot be resolved safely, normal void damage applies.
+    const destination = getVoidboundDestination();
+    if (!destination) return;
+
     event.cancel = true;
     system.run(() => {
       try {
-        if (!player.isValid()) return;
-        const spawn = world.getDefaultSpawnLocation();
-        const overworld = world.getDimension("overworld");
-        player.teleport(
-          { x: spawn.x, y: spawn.y + 1, z: spawn.z },
-          { dimension: overworld, checkForBlocks: true }
-        );
+        if (!player.isValid) return;
+        player.teleport(destination.location, {
+          dimension: destination.dimension,
+          checkForBlocks: true,
+          forceProvidedPositionOnDimensionChange: true,
+        });
         player.sendMessage("§5[Endersteel] §rVoidbound returned you to the Overworld.");
       } catch {
         // A failed teleport must not interrupt the server tick.
@@ -408,66 +487,80 @@ system.beforeEvents.startup.subscribe((event) => {
         );
       }
 
-      const ownedWolves = player.dimension
-        .getEntities({ type: "minecraft:wolf" })
-        .filter((entity) => {
-          try {
-            const tameable = entity.getComponent(EntityComponentTypes.Tameable);
-            return tameable?.tamedToPlayerId === player.id;
-          } catch {
-            return false;
+      return queuePlayerAction(player, () => {
+        const ownedWolves = player.dimension
+          .getEntities({ type: "minecraft:wolf" })
+          .filter((entity) => {
+            try {
+              const tameable = entity.getComponent(EntityComponentTypes.Tameable);
+              return tameable?.tamedToPlayerId === player.id;
+            } catch {
+              return false;
+            }
+          });
+
+        if (args[0] === "dismiss") {
+          for (const wolf of ownedWolves) {
+            try {
+              wolf.remove();
+            } catch {
+              // Continue dismissing any remaining owned companions.
+            }
           }
-        });
-
-      if (args[0] === "dismiss") {
-        for (const wolf of ownedWolves) {
-          try {
-            wolf.remove();
-          } catch {
-            // Continue dismissing any remaining owned companions.
-          }
-        }
-        return commandResult(
-          CustomCommandStatus.Success,
-          ownedWolves.length
-            ? "Your guardian companion has been dismissed."
-            : "You do not have a guardian companion in this dimension."
-        );
-      }
-
-      if (ownedWolves.length > 0) {
-        return commandResult(
-          CustomCommandStatus.Failure,
-          "You already have a guardian companion in this dimension. Dismiss it first."
-        );
-      }
-
-      try {
-        const location = player.location;
-        const wolf = player.dimension.spawnEntity("minecraft:wolf", {
-          x: location.x + 1.5,
-          y: location.y,
-          z: location.z,
-        });
-        const tameable = wolf.getComponent(EntityComponentTypes.Tameable);
-        if (!tameable?.tame(player)) {
-          wolf.remove();
           return commandResult(
-            CustomCommandStatus.Failure,
-            "The guardian companion could not be bound to you."
+            CustomCommandStatus.Success,
+            ownedWolves.length
+              ? "Your guardian companion has been dismissed."
+              : "You do not have a guardian companion in this dimension."
           );
         }
-        wolf.nameTag = `${player.name}'s Guardian`;
-        return commandResult(
-          CustomCommandStatus.Success,
-          "Your guardian companion has been summoned. It recognizes you as its owner and can defend you when threatened."
-        );
-      } catch {
-        return commandResult(
-          CustomCommandStatus.Failure,
-          "Could not summon a guardian companion here."
-        );
-      }
+
+        if (ownedWolves.length > 0) {
+          return commandResult(
+            CustomCommandStatus.Failure,
+            "You already have a guardian companion in this dimension. Dismiss it first."
+          );
+        }
+
+        let wolf;
+        try {
+          const location = player.location;
+          wolf = player.dimension.spawnEntity("minecraft:wolf", {
+            x: location.x + 1.5,
+            y: location.y,
+            z: location.z,
+          });
+          const tameable = wolf.getComponent(EntityComponentTypes.Tameable);
+          if (!tameable?.tame(player)) {
+            try {
+              wolf.remove();
+            } catch {
+              // Best effort cleanup if the spawned entity is already invalid.
+            }
+            return commandResult(
+              CustomCommandStatus.Failure,
+              "The guardian companion could not be bound to you."
+            );
+          }
+          wolf.nameTag = `${player.name}'s Guardian`;
+          return commandResult(
+            CustomCommandStatus.Success,
+            "Your guardian companion has been summoned. It recognizes you as its owner and can defend you when threatened."
+          );
+        } catch {
+          // Once spawnEntity succeeds, every later failure must attempt cleanup
+          // so a partially initialized, untamed wolf is not left behind.
+          try {
+            wolf?.remove();
+          } catch {
+            // Ignore cleanup errors while reporting the summon failure.
+          }
+          return commandResult(
+            CustomCommandStatus.Failure,
+            "Could not summon a guardian companion here."
+          );
+        }
+      });
     }
   );
 
@@ -494,7 +587,7 @@ system.beforeEvents.startup.subscribe((event) => {
           "Run this command in-game as a player."
         );
       }
-      return applyEndersteel(source, args[0]);
+      return queuePlayerAction(source, () => applyEndersteel(source, args[0]));
     }
   );
 
@@ -534,7 +627,7 @@ system.beforeEvents.startup.subscribe((event) => {
         );
       }
 
-      return applyEnchantment(source, args[0], args[1]);
+      return queuePlayerAction(source, () => applyEnchantment(source, args[0], args[1]));
     }
   );
 });

@@ -9,6 +9,20 @@ SCRIPT = (ROOT / "scripts" / "main.js").read_text(encoding="utf-8")
 
 
 class BehaviorPackContractTests(unittest.TestCase):
+    def test_project_version_matches_bedrock_manifest_version(self):
+        import re
+
+        version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+        match = re.fullmatch(
+            r"v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)",
+            version,
+        )
+        self.assertIsNotNone(match)
+        expected = [int(part) for part in match.groups()[:3]]
+        manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["header"]["version"], expected)
+        self.assertEqual(manifest["modules"][0]["version"], expected)
+
     def test_manifest_uses_server_script_module(self):
         manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(len(manifest["modules"]), 1)
@@ -48,8 +62,39 @@ class BehaviorPackContractTests(unittest.TestCase):
         self.assertIn('event.damageSource?.cause !== "void"', body)
         self.assertIn("hasFullEndersteelSet(equippable)", body)
         self.assertIn("event.cancel = true", body)
+        self.assertIn("getVoidboundDestination()", body)
         self.assertIn("system.run(() =>", body)
-        self.assertIn('world.getDimension("overworld")', body)
+
+        destination = SCRIPT.split("function getVoidboundDestination() {", 1)[1]
+        destination_body = destination.split(chr(10) + "}", 1)[0]
+        self.assertIn('world.getDimension("overworld")', destination_body)
+        self.assertIn("getTopmostBlock", destination_body)
+        self.assertIn("surface.y + 1", destination_body)
+        self.assertIn("surface.isLiquid", destination_body)
+        self.assertIn("forceProvidedPositionOnDimensionChange: true", SCRIPT)
+        self.assertIn("if (!player.isValid) return", SCRIPT)
+
+
+
+    def test_disposable_bds_guide_uses_isolated_world_and_distinct_ports(self):
+        guide = (ROOT / "docs" / "DISPOSABLE-BDS-SETUP.md").read_text(encoding="utf-8")
+        self.assertIn("worlds/Innygr-Plugin-Test/behavior_packs/", guide)
+        self.assertIn("world_behavior_packs.json", guide)
+        self.assertIn("level-name=Innygr-Plugin-Test", guide)
+        self.assertIn("gamemode=creative", guide)
+        self.assertIn("allow-cheats=true", guide)
+        self.assertIn("content-log-file-enabled=true", guide)
+        self.assertIn("server-port=19134", guide)
+        self.assertIn("server-portv6=19135", guide)
+        self.assertIn("enable-lan-visibility=false", guide)
+        self.assertIn("Do not reuse or bind-mount the live server's world volume.", guide)
+
+    def test_voidbound_requires_matching_diamond_armor_types(self):
+        full_set = SCRIPT.split("function hasFullEndersteelSet(equippable)", 1)[1]
+        full_set = full_set.split(chr(10) + "}", 1)[0]
+        self.assertIn("Object.values(ENDERSTEEL_PIECES)", full_set)
+        self.assertIn("item?.typeId === piece.typeId", full_set)
+        self.assertIn("hasEndersteel(item)", full_set)
 
     def test_endersteel_command_is_admin_only(self):
         command = SCRIPT.split('name: "innygr:endersteel"', 1)[1].split("registry.registerEnum", 1)[0]
@@ -59,8 +104,16 @@ class BehaviorPackContractTests(unittest.TestCase):
     def test_enchantment_markers_are_scoped_per_enchantment(self):
         self.assertIn("function getMarkerLine(enchantment, level)", SCRIPT)
         self.assertIn("const markerPrefix = `${PACK_PREFIX}${enchantment}:`", SCRIPT)
-        self.assertIn("if (line.startsWith(markerPrefix))", SCRIPT)
+        self.assertIn('if (typeof line === "string" && line.startsWith(markerPrefix))', SCRIPT)
         self.assertIn("lore.push(getMarkerLine(enchantment, level))", SCRIPT)
+        self.assertIn("item.getRawLore()", SCRIPT)
+        self.assertIn("getLoreEntryText(entry)", SCRIPT)
+        self.assertIn("lore.push(entry)", SCRIPT)
+
+
+    def test_endersteel_marker_reads_raw_lore_text(self):
+        self.assertIn("item.getRawLore().some(", SCRIPT)
+        self.assertIn("getLoreEntryText(entry) === ENDERSTEEL_MARKER", SCRIPT)
 
     def test_enchantment_levels_are_validated_before_application(self):
         self.assertIn(
@@ -138,6 +191,14 @@ class PackArchiveTests(unittest.TestCase):
                 )
                 self.assertEqual(archive.testzip(), None)
 
+            checksum_path = Path(str(output) + ".sha256")
+            checksum, filename = checksum_path.read_text(encoding="utf-8").split()
+            import hashlib
+            self.assertEqual(filename, output.name)
+            self.assertEqual(checksum, hashlib.sha256(output.read_bytes()).hexdigest())
+            self.assertFalse(Path(str(output) + ".tmp").exists())
+            self.assertFalse(Path(str(checksum_path) + ".tmp").exists())
+
     def test_builder_output_is_reproducible(self):
         import hashlib
         import subprocess
@@ -166,6 +227,35 @@ class PackArchiveTests(unittest.TestCase):
 
 
 class PackOutputSafetyTests(unittest.TestCase):
+    def test_builder_refuses_to_overwrite_other_repository_files(self):
+        import subprocess
+        import sys
+
+        readme_path = ROOT / "README.md"
+        original_readme = readme_path.read_bytes()
+        checksum_path = Path(str(readme_path) + ".sha256")
+        original_checksum = checksum_path.read_bytes() if checksum_path.exists() else None
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "tools" / "package_pack.py"),
+                "--output",
+                str(readme_path),
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("must be under dist/", result.stderr)
+        self.assertEqual(readme_path.read_bytes(), original_readme)
+        if original_checksum is None:
+            self.assertFalse(checksum_path.exists())
+        else:
+            self.assertEqual(checksum_path.read_bytes(), original_checksum)
+
+
     def test_builder_refuses_to_overwrite_pack_sources(self):
         import subprocess
         import sys
@@ -183,8 +273,24 @@ class PackOutputSafetyTests(unittest.TestCase):
             text=True,
         )
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("must not overwrite a pack source file", result.stderr)
+        self.assertIn("must be under dist/", result.stderr)
         self.assertEqual(manifest_path.read_bytes(), original_manifest)
+
+        version_path = ROOT / "VERSION"
+        original_version = version_path.read_bytes()
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "tools" / "package_pack.py"),
+                "--output",
+                str(version_path),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("must be under dist/", result.stderr)
+        self.assertEqual(version_path.read_bytes(), original_version)
 
         script_path = ROOT / "scripts" / "main.js"
         original_script = script_path.read_bytes()
@@ -199,5 +305,5 @@ class PackOutputSafetyTests(unittest.TestCase):
             text=True,
         )
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("must not overwrite a pack source file", result.stderr)
+        self.assertIn("must be under dist/", result.stderr)
         self.assertEqual(script_path.read_bytes(), original_script)

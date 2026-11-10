@@ -4,7 +4,7 @@
     "name": "InnygrEnchantments",
     "description": "Server-side gameplay utilities and enchantment prototypes for The Cat Server.",
     "uuid": "263b6506-b1c7-4d59-a227-45d7088ba84c",
-    "version": [0, 1, 0],
+    "version": [0, 1, 5],
     "min_engine_version": [1, 26, 50]
   },
   "modules": [
@@ -12,7 +12,7 @@
       "type": "script",
       "language": "javascript",
       "uuid": "75cbcf43-bdc8-4b45-be78-605477a3d5b8",
-      "version": [0, 1, 0],
+      "version": [0, 1, 5],
       "entry": "scripts/main.js"
     }
   ],

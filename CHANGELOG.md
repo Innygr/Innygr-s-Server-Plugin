@@ -1,8 +1,34 @@
 # Changelog
 
-## Unreleased
+## v0.1.5.3 — testing candidate
 
 ### Added
+- Restrict package-builder output inside the repository to `dist/` and atomically replace the SHA-256 sidecar.
+- Add a regression test proving a mistyped output path cannot overwrite README or other repository source files.
+- Deferred equipment and companion command mutations through `system.run`, as required by Minecraft's restricted custom-command callback context.
+- Runtime tests enforce restricted-context write bans for item lore, equipment, and companion entities.
+- Lore updates use `ItemStack.getRawLore()` to preserve structured `RawMessage` entries, and refuse to exceed Minecraft's 20-line lore limit for enchantments and Endersteel.
+- Runtime coverage verifies RawMessage marker reads, queued companion duplicate prevention, and cleanup after tameable-component, taming, or name-tag failures.
+- Disposable BDS instructions now specify Creative mode, cheats/content logging, and non-default IPv4/IPv6 ports to avoid the usual server ports.
+- A documentation regression test keeps the disposable setup world-scoped and separated from the live server volume.
+- Voidbound resolves Bedrock's automatic world-spawn height using the Overworld's topmost block, preserves the provided destination across dimension changes, and fails open when no usable surface is available.
+- Corrected Entity.isValid handling to use the stable boolean property; the runtime harness now models the official API shape.
+- Regression tests cover automatic spawn height, missing terrain, and liquid spawn surfaces.
+- Runtime tests verifying command state changes occur on the scheduled tick and report their eventual result in chat.
+- Four-part project version file and versioned package names.
+- Bedrock manifest version synchronization with the first three project-version components.
+- SHA-256 sidecar generation and verification in CI.
+- A disposable-world test-results template, explicit candidate test matrix, and per-world Bedrock Dedicated Server setup recipe.
+- One consolidated version-named commit per development increment.
+
+### Validation
+- CI runs JavaScript syntax checks, 30 mocked runtime cases, Python regression tests, versioned package construction, and checksum verification.
+- In-game testing, Bedrock server compatibility, multiplayer behavior, and performance remain unverified.
+
+### Not included
+- No live-world installation, server deployment, or restart.
+
+### Existing prototype features
 - Runtime regressions for enchantment reapplication, shared-effect priority, refresh timing, and natural effect expiry after gear removal.
 - Prospector threshold tests for all three levels, plus deepslate and Nether ore mapping coverage.
 - Package-builder protection and regression tests preventing output paths from overwriting source files.

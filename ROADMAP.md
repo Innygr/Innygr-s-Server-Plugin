@@ -1,5 +1,20 @@
 # Roadmap
 
+## Current candidate: v0.1.5.3
+
+- [x] Establish four-part project versioning and version-named commit convention.
+- [x] Generate versioned `.mcpack` output with SHA-256 sidecar and repository-wide output-path protection.
+- [x] Validate Bedrock manifest version against project version.
+- [x] Add CI checksum verification and versioned artifact naming.
+- [x] Prepare disposable-world test matrix, dedicated-server setup recipe, and results template.
+- [x] Enforce restricted-context write deferral in mocked runtime tests.
+- [x] Clean up companion entities after every post-spawn initialization failure and cover those failures in regression tests.
+- [x] Require correct Endersteel diamond armor types for Voidbound and test every enchantment level/item pairing.
+- [x] Resolve automatic-height world spawn for Voidbound; do not cancel damage without a usable destination.
+- [ ] Complete disposable-world verification on the target Bedrock runtime.
+- [ ] Record multiplayer and basic performance results.
+- [ ] Promote only a verified package to a release build.
+
 ## Phase 0 — Foundation
 - [x] Create the development branch.
 - [x] Establish project scope and development priorities.
@@ -20,7 +35,7 @@
 - [ ] Implement the remaining approved candidate enchantments where stable API support exists.
 - [x] Add CI regression coverage for marker coexistence, level validation, effect refresh safeguards, and Prospector rules.
 - [ ] Test multi-enchantment lore persistence, command registration, effects, and ore drops in a disposable world.
-- [x] Add deterministic `.mcpack` packaging and CI artifact upload.
+- [x] Add deterministic, versioned `.mcpack` packaging, SHA-256 sidecars, and CI artifact upload.
 
 ## Phase 2 — Endersteel
 - [x] Add an Endersteel marker to equipped diamond armor pieces.

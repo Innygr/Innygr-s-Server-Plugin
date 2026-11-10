@@ -16,18 +16,27 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Read project version
+        id: version
+        run: echo "value=$(cat VERSION)" >> "$GITHUB_OUTPUT"
       - name: Check JavaScript syntax
         run: node --input-type=module --check < scripts/main.js
       - name: Run mocked Script API runtime tests
         run: node --test tests/runtime.test.mjs
       - name: Run Behavior Pack regression tests
         run: python3 -m unittest discover -s tests -v
-      - name: Build distributable Behavior Pack
-        run: python3 tools/package_pack.py --output dist/InnygrEnchantments.mcpack
-      - name: Upload Behavior Pack artifact
+      - name: Build versioned distributable Behavior Pack
+        run: python3 tools/package_pack.py
+      - name: Verify package checksum
+        run: |
+          cd dist
+          sha256sum -c "InnygrEnchantments-${{ steps.version.outputs.value }}.mcpack.sha256"
+      - name: Upload versioned Behavior Pack and checksum
         uses: actions/upload-artifact@v4
         with:
-          name: InnygrEnchantments-mcpack
-          path: dist/InnygrEnchantments.mcpack
+          name: InnygrEnchantments-${{ steps.version.outputs.value }}
+          path: |
+            dist/*.mcpack
+            dist/*.mcpack.sha256
           if-no-files-found: error
           retention-days: 14

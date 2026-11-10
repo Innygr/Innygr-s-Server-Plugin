@@ -1,0 +1,10 @@
+# Generated Behavior Pack builds
+dist/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Editor / OS noise
+.DS_Store
