@@ -116,6 +116,27 @@ test("registers player companion command and admin utility commands", () => {
   assert.deepEqual(Array.from(h.enums.get("innygr:companion_action")), ["summon", "dismiss"]);
 });
 
+
+test("reapplying one enchantment replaces only its own level marker and label", () => {
+  const h = createHarness();
+  const chest = makeItem("minecraft:diamond_chestplate", ["§7Unrelated note"]);
+  const player = makePlayer({ Chest: chest });
+  const command = h.commands.get("innygr:enchant").callback;
+
+  assert.equal(command({ sourceEntity: player }, ["vitality", 1]).status, 0);
+  assert.equal(command({ sourceEntity: player }, ["safeguard", 2]).status, 0);
+  assert.equal(command({ sourceEntity: player }, ["vitality", 3]).status, 0);
+
+  const lore = player.slots.get("Chest").lore();
+  assert.ok(lore.includes("§7Unrelated note"));
+  assert.ok(lore.includes("§7Vitality III"));
+  assert.ok(lore.includes("§0[IE:vitality:3]"));
+  assert.ok(lore.includes("§7Safeguard II"));
+  assert.ok(lore.includes("§0[IE:safeguard:2]"));
+  assert.equal(lore.some((line) => line === "§0[IE:vitality:1]"), false);
+  assert.equal(lore.filter((line) => line.startsWith("§7Vitality ")).length, 1);
+});
+
 test("applies compatible enchantments and preserves other marker lines", () => {
   const h = createHarness();
   const chest = makeItem("minecraft:diamond_chestplate");
@@ -150,6 +171,66 @@ test("effect refresh adds missing effects but preserves stronger existing effect
   player.effects.delete("regeneration");
   h.callbacks.interval();
   assert.equal(player.effects.get("regeneration").amplifier, 1);
+});
+
+
+test("effect refresh waits until the matching effect is nearly expired", () => {
+  const h = createHarness();
+  const chest = makeItem("minecraft:diamond_chestplate", ["§0[IE:vitality:2]"]);
+  const player = makePlayer({ Chest: chest });
+  player.effects.set("regeneration", { amplifier: 1, duration: 100 });
+  h.world.getPlayers = () => [player];
+
+  h.callbacks.interval();
+  assert.deepEqual(
+    { ...player.effects.get("regeneration") },
+    { amplifier: 1, duration: 100 }
+  );
+
+  player.effects.set("regeneration", { amplifier: 1, duration: 25 });
+  h.callbacks.interval();
+  assert.deepEqual(
+    { ...player.effects.get("regeneration") },
+    { amplifier: 1, duration: 40 }
+  );
+});
+
+test("removing an enchanted item stops refreshing its remaining effect", () => {
+  const h = createHarness();
+  const chest = makeItem("minecraft:diamond_chestplate", ["§0[IE:vitality:1]"]);
+  const player = makePlayer({ Chest: chest });
+  h.world.getPlayers = () => [player];
+
+  h.callbacks.interval();
+  assert.equal(player.effects.get("regeneration").duration, 40);
+
+  player.slots.delete("Chest");
+  player.effects.set("regeneration", { amplifier: 0, duration: 12 });
+  h.callbacks.interval();
+  assert.equal(player.effects.get("regeneration").duration, 12);
+});
+
+test("shared effect types keep the strongest equipped enchantment level", () => {
+  const h = createHarness();
+  const player = makePlayer({
+    Chest: makeItem("minecraft:diamond_chestplate", ["§0[IE:safeguard:2]"]),
+    Offhand: makeItem("minecraft:shield", ["§0[IE:defender:3]"]),
+    Head: makeItem("minecraft:diamond_helmet", ["§0[IE:aquatic:1]"]),
+  });
+  h.world.getPlayers = () => [player];
+
+  h.callbacks.interval();
+  assert.equal(player.effects.get("resistance").amplifier, 2);
+  assert.equal(player.effects.get("conduit_power").amplifier, 0);
+
+  player.slots.set("Chest", makeItem(
+    "minecraft:diamond_chestplate",
+    ["§0[IE:safeguard:3]"]
+  ));
+  player.slots.set("Offhand", makeItem("minecraft:shield", ["§0[IE:defender:1]"]));
+  player.effects.delete("resistance");
+  h.callbacks.interval();
+  assert.equal(player.effects.get("resistance").amplifier, 2);
 });
 
 test("Voidbound cancels void damage and schedules a return to the Overworld", () => {
@@ -198,6 +279,51 @@ function makeBlockBreakEvent(tool, blockId = "minecraft:coal_ore") {
   };
   return { event, drops };
 }
+
+
+test("Prospector applies the configured threshold for all three levels", () => {
+  for (const [level, chance] of [[1, 0.05], [2, 0.10], [3, 0.15]]) {
+    const successfulHarness = createHarness(chance - 0.001);
+    const tool = makeItem(
+      "minecraft:diamond_pickaxe",
+      [`§0[IE:prospector:${level}]`]
+    );
+    const success = makeBlockBreakEvent(tool);
+    successfulHarness.callbacks.blockBreak(success.event);
+    assert.equal(success.drops.length, 1, `level ${level} should pass below its threshold`);
+
+    const boundaryHarness = createHarness(chance);
+    const boundary = makeBlockBreakEvent(tool);
+    boundaryHarness.callbacks.blockBreak(boundary.event);
+    assert.equal(boundary.drops.length, 0, `level ${level} should fail at its threshold`);
+  }
+});
+
+test("Prospector supports deepslate and Nether ore drop mappings", () => {
+  const cases = [
+    ["minecraft:deepslate_iron_ore", "minecraft:raw_iron"],
+    ["minecraft:lit_deepslate_redstone_ore", "minecraft:redstone"],
+    ["minecraft:nether_gold_ore", "minecraft:gold_nugget"],
+    ["minecraft:nether_quartz_ore", "minecraft:quartz"],
+  ];
+
+  for (const [blockId, expectedDrop] of cases) {
+    const h = createHarness(0);
+    const tool = makeItem("minecraft:netherite_pickaxe", ["§0[IE:prospector:3]"]);
+    const { event, drops } = makeBlockBreakEvent(tool, blockId);
+    h.callbacks.blockBreak(event);
+    assert.equal(drops.length, 1, blockId);
+    assert.equal(drops[0].item.typeId, expectedDrop, blockId);
+  }
+});
+
+test("Prospector ignores marked non-pickaxes", () => {
+  const h = createHarness(0);
+  const tool = makeItem("minecraft:diamond_axe", ["§0[IE:prospector:3]"]);
+  const { event, drops } = makeBlockBreakEvent(tool);
+  h.callbacks.blockBreak(event);
+  assert.equal(drops.length, 0);
+});
 
 test("Prospector creates the configured bonus drop for a qualifying ore", () => {
   const h = createHarness(0);
