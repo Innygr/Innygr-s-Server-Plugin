@@ -10,7 +10,7 @@ From the repository root:
 python3 tools/package_pack.py
 ```
 
-The builder creates `dist/InnygrEnchantments.mcpack`. The archive intentionally contains only `manifest.json` and `scripts/main.js`; it excludes tests, documentation, source-control metadata, and client assets. Fixed ZIP timestamps make identical source inputs produce identical archive bytes.
+The builder creates `dist/InnygrEnchantments.mcpack`. The archive intentionally contains only `manifest.json` and `scripts/main.js`; it excludes tests, documentation, source-control metadata, and client assets. The builder also refuses an output path that resolves to either source file. Fixed ZIP timestamps make identical source inputs produce identical archive bytes.
 
 ## 2. Create an isolated test world
 
@@ -51,7 +51,7 @@ Use fresh vanilla items and check both lore and behavior.
 | Springload | Wear marked boots | Jump Boost is applied |
 | Defender | Hold a marked shield in the off-hand | Resistance applies; vanilla blocking still works |
 | Water Affinity | Hold a marked nautilus shell underwater | Water-related effects apply |
-| Effect removal | Remove the marked item and wait for refresh/expiry | Its custom effect is no longer refreshed |
+| Effect removal | Remove the marked item and wait up to about two seconds | Its custom effect is no longer refreshed and the remaining effect expires naturally |
 | Prospector | Mine supported ore with a marked pickaxe | Bonus drop follows its 5% / 10% / 15% level chance |
 | Silk Touch | Mine supported ore with a marked Silk Touch pickaxe | No Prospector bonus drop |
 
