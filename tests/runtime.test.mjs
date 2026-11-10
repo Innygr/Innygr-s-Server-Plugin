@@ -312,20 +312,34 @@ test("companion summon prevents a second owned wolf in the same dimension", () =
   assert.equal(player.dimension.entities.length, 1);
 });
 
-test("companion dismissal removes only the requesting player's companion", () => {
+test("companion dismissal removes only the requesting player's wolf in a shared dimension", () => {
   const h = createHarness();
   const player = makeCompanionPlayer("owner-1", "Tester");
-  const otherPlayer = makeCompanionPlayer("owner-2", "Other");
   const command = h.commands.get("innygr:companion").callback;
   command({ sourceEntity: player }, ["summon"]);
-  command({ sourceEntity: otherPlayer }, ["summon"]);
   const ownWolf = player.dimension.entities[0];
-  const otherWolf = otherPlayer.dimension.entities[0];
+  const otherWolf = {
+    typeId: "minecraft:wolf",
+    valid: true,
+    getComponent: () => ({ tamedToPlayerId: "owner-2" }),
+    remove: () => { otherWolf.valid = false; },
+  };
+  player.dimension.entities.push(otherWolf);
 
   const result = command({ sourceEntity: player }, ["dismiss"]);
   assert.equal(result.status, 0);
   assert.equal(ownWolf.valid, false);
   assert.equal(otherWolf.valid, true);
+});
+
+test("companion dismissal without an owned wolf is a safe no-op", () => {
+  const h = createHarness();
+  const player = makeCompanionPlayer("owner-1", "Tester");
+  const result = h.commands.get("innygr:companion").callback(
+    { sourceEntity: player }, ["dismiss"]
+  );
+  assert.equal(result.status, 0);
+  assert.equal(player.dimension.entities.length, 0);
 });
 
 test("companion ownership is scoped to the player's current dimension", () => {
@@ -363,4 +377,15 @@ test("companion summon cleans up the spawned entity if ownership binding fails",
   );
   assert.equal(result.status, 1);
   assert.equal(spawned.valid, false);
+});
+
+
+test("companion summon reports spawn failures without throwing", () => {
+  const h = createHarness();
+  const player = makeCompanionPlayer("owner-1", "Tester");
+  player.dimension.spawnEntity = () => { throw new Error("spawn unavailable"); };
+  const result = h.commands.get("innygr:companion").callback(
+    { sourceEntity: player }, ["summon"]
+  );
+  assert.equal(result.status, 1);
 });
