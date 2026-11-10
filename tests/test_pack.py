@@ -163,3 +163,41 @@ class PackArchiveTests(unittest.TestCase):
                 for output in outputs
             ]
             self.assertEqual(digests[0], digests[1])
+
+
+class PackOutputSafetyTests(unittest.TestCase):
+    def test_builder_refuses_to_overwrite_pack_sources(self):
+        import subprocess
+        import sys
+
+        manifest_path = ROOT / "manifest.json"
+        original_manifest = manifest_path.read_bytes()
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "tools" / "package_pack.py"),
+                "--output",
+                str(manifest_path),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("must not overwrite a pack source file", result.stderr)
+        self.assertEqual(manifest_path.read_bytes(), original_manifest)
+
+        script_path = ROOT / "scripts" / "main.js"
+        original_script = script_path.read_bytes()
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "tools" / "package_pack.py"),
+                "--output",
+                str(script_path),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("must not overwrite a pack source file", result.stderr)
+        self.assertEqual(script_path.read_bytes(), original_script)
