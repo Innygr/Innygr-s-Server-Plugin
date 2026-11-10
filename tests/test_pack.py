@@ -89,7 +89,7 @@ class BehaviorPackContractTests(unittest.TestCase):
         self.assertIn('.getEntities({ type: "minecraft:wolf" })', SCRIPT)
         self.assertIn("tameable?.tamedToPlayerId === player.id", SCRIPT)
         self.assertIn("player.dimension", SCRIPT)
-        self.assertIn("tameable.tame(player)", SCRIPT)
+        self.assertIn("tameable?.tame(player)", SCRIPT)
 
     def test_companion_prevents_duplicates_and_dismisses_owned_wolves(self):
         self.assertIn('if (args[0] === "dismiss")', SCRIPT)
