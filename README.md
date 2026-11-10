@@ -53,7 +53,7 @@ Multiple custom enchantments can coexist on one compatible vanilla item.
 
 Operators apply a prototype using `/innygr:enchant <vitality|safeguard|aquatic|springload|defender|water_affinity|prospector> <1-3>` while wearing or holding the matching item.
 
-See [the enchantment plan](docs/ENCHANTMENTS.md), [the off-hand plan](docs/OFFHAND.md), and the [roadmap](ROADMAP.md).
+See [the enchantment plan](docs/ENCHANTMENTS.md), [the off-hand plan](docs/OFFHAND.md), the [disposable-world testing guide](docs/TESTING.md), and the [roadmap](ROADMAP.md).
 
 ## Repository layout
 
@@ -61,9 +61,12 @@ See [the enchantment plan](docs/ENCHANTMENTS.md), [the off-hand plan](docs/OFFHA
 .
 ├── docs/
 │   ├── ENCHANTMENTS.md
-│   └── OFFHAND.md
+│   ├── OFFHAND.md
+│   └── TESTING.md
 ├── scripts/
 │   └── main.js
+├── tools/
+│   └── package_pack.py
 ├── tests/
 │   ├── runtime.test.mjs
 │   └── test_pack.py
@@ -74,6 +77,8 @@ See [the enchantment plan](docs/ENCHANTMENTS.md), [the off-hand plan](docs/OFFHA
 
 ## Automated checks
 
+Build a distributable `.mcpack` locally with `python3 tools/package_pack.py`. The archive contains only the manifest and server script. GitHub Actions also builds and uploads the package as a 14-day workflow artifact on each successful run.
+
 Run the checks locally:
 
 ```bash
@@ -82,7 +87,7 @@ node --test tests/runtime.test.mjs
 python3 -m unittest discover -s tests -v
 ```
 
-GitHub Actions runs all three checks on pushes and pull requests. The Node runtime suite evaluates the actual script with a small mocked Bedrock Script API surface and exercises command registration, enchantment application, effect refresh safeguards, Prospector drops and Silk Touch handling, guardian companion ownership/summon/dismiss edge cases, Endersteel upgrade validation, and Voidbound full-set/invalid-player event flow. Python tests continue to check pack structure and implementation contracts.
+GitHub Actions runs all three checks on pushes and pull requests. The Node runtime suite evaluates the actual script with a small mocked Bedrock Script API surface and exercises command registration, enchantment application, effect refresh safeguards, Prospector drops and Silk Touch handling, guardian companion ownership/summon/dismiss edge cases, Endersteel upgrade validation, Endersteel upgrade validation, Voidbound full-set/invalid-player event flow, and deterministic package contents. Python tests continue to check pack structure and implementation contracts.
 
 **Passing CI is not a substitute for in-game testing.** The mock harness cannot prove real Bedrock command registration, item lore persistence, entity behavior, or cross-dimension teleporting. Those still need verification in a disposable Bedrock world.
 
