@@ -206,7 +206,9 @@ test("Prospector creates the configured bonus drop for a qualifying ore", () => 
   h.callbacks.blockBreak(event);
   assert.equal(drops.length, 1);
   assert.equal(drops[0].item.typeId, "minecraft:coal");
-  assert.deepEqual(drops[0].location, { x: 4.5, y: 12.5, z: -2.5 });
+  assert.equal(drops[0].location.x, 4.5);
+  assert.equal(drops[0].location.y, 12.5);
+  assert.equal(drops[0].location.z, -2.5);
 });
 
 test("Prospector does not add a bonus drop when the pickaxe has Silk Touch", () => {
